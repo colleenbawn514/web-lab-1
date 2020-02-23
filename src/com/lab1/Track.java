@@ -1,21 +1,30 @@
 package com.lab1;
+import java.io.*;
 
-public class Track {
-
+public class Track implements Serializable{
+    private static final long serialVersionUID = 1;
     private String name;
     private double size;
     private int duration;
-    private int id;
 
-    public Track(String name, double size, int duration, int id) {
+    /**
+     * @param name     - название трека
+     * @param size     - размер трека (МБ)
+     * @param duration - длительность трека (сек)
+     */
+    public Track(String name, double size, int duration) {
+        if(name.equals("")) {
+            throw new IllegalArgumentException("The name must not be empty");
+        }
         this.name = name;
+        if(size <= 0) {
+            throw new IllegalArgumentException("Size must be positive and greater than zero");
+        }
         this.size = size;
-        this.id = id;
+        if(duration <= 0) {
+            throw new IllegalArgumentException("Duration must be positive and greater than zero");
+        }
         this.duration = duration;
-    }
-
-    public int getId() {
-        return this.id;
     }
 
     public String getName() {
@@ -26,11 +35,33 @@ public class Track {
         this.name = newName;
     }
 
+    public void setSize(double newSize) {
+        this.size = newSize;
+    }
+
+    public void setDuration(int newDuration) {
+        this.duration = newDuration;
+    }
+
     public double getSize() {
         return this.size;
     }
 
     public int getDuration() {
         return this.duration;
+    }
+
+    public void exportToFile(String path) throws IOException {
+        FileOutputStream outputStream = new FileOutputStream(path);
+        ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
+        objectOutputStream.writeObject(this);
+        objectOutputStream.close();
+    }
+
+    static Track importFromFile(String path) throws IOException, ClassNotFoundException {
+        FileInputStream fileInputStream = new FileInputStream(path);
+        ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+
+        return (Track) objectInputStream.readObject();
     }
 }
