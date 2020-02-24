@@ -12,11 +12,11 @@ public class Track implements Serializable{
      * @param size     - размер трека (МБ)
      * @param duration - длительность трека (сек)
      */
-    public Track(String name, double size, int duration) {
-        if(name.equals("")) {
+    public Track(String name, double size, int duration) throws IllegalArgumentException {
+        if(name.trim().equals("")) {
             throw new IllegalArgumentException("The name must not be empty");
         }
-        this.name = name;
+        this.name = name.trim();
         if(size <= 0) {
             throw new IllegalArgumentException("Size must be positive and greater than zero");
         }
@@ -56,6 +56,10 @@ public class Track implements Serializable{
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
         objectOutputStream.writeObject(this);
         objectOutputStream.close();
+
+    }
+    public boolean equals(Track track) {
+        return this.name.equals(track.name)  && this.duration == track.duration && this.size == track.size;
     }
 
     static Track importFromFile(String path) throws IOException, ClassNotFoundException {

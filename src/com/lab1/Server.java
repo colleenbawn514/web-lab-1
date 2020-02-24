@@ -1,6 +1,5 @@
 package com.lab1;
 
-import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
@@ -9,7 +8,7 @@ import java.util.Map;
 
 public class Server implements MusicLibrary {
     private Map<Integer, Playlist> playlists = new HashMap<>();
-    private int playlistIdIterator = 0;
+    private int playlistIdIterator = 0;//колво плейлистов
     static private final int SERVER_PORT = 80;
 
     public Server() {
@@ -41,18 +40,13 @@ public class Server implements MusicLibrary {
         return id;
     }
 
-    public int createPlaylistFromFile(String name, String path) {
-        int playlistId = createPlaylist(name);
 
-        //TODO Read tracks from file
-
-        return playlistId;
-    }
-
-    public int addTrack(int playlistId, String name, double size, int duration) {
+    public int addTrack(int playlistId, String name, double size, int duration) throws IllegalArgumentException {
         checkExistPlaylist(playlistId);
 
-        return this.playlists.get(playlistId).addTrack(new Track(name, size, duration));
+        Track track = new Track(name, size, duration);
+
+        return this.playlists.get(playlistId).addTrack(track);
     }
 
     public void removeTrack(int playlistId, int trackId) {
@@ -101,9 +95,17 @@ public class Server implements MusicLibrary {
         this.playlists.get(playlistId).sort(isAsc);
     }
 
+    public void duplicateTrackRemovalPlaylist(int playlistId) {
+        checkExistPlaylist(playlistId);
+
+        this.playlists.get(playlistId).duplicateTrackRemoval();
+
+    }
+
     private void checkExistPlaylist(int playlistId) {
         if (!this.playlists.containsKey(playlistId)) {
             throw new NullPointerException("Playlist with such ID does not exist");
         }
     }
+
 }

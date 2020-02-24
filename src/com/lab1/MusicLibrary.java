@@ -7,8 +7,6 @@ public interface MusicLibrary extends Remote {
     //Создает новый плейлист и возращет его ID
     int createPlaylist(String name) throws RemoteException;
 
-    //Создает новый плейлист и возращет его ID
-    int createPlaylistFromFile(String name, String path) throws RemoteException;
 
     //Добавляет трек в библиотеку и возвращает его ID
     int addTrack(int playlistId, String name, double size, int duration) throws RemoteException;
@@ -36,4 +34,7 @@ public interface MusicLibrary extends Remote {
 
     //Сортирует плейлист
     void sortPlaylist (int playlistId, boolean isAsc) throws RemoteException;
+
+    //Удаление дупликатов
+    void duplicateTrackRemovalPlaylist( int playlistId) throws RemoteException;
 }

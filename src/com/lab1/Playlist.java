@@ -15,7 +15,10 @@ public class Playlist {
     private int id;
 
     public Playlist(String name, int id) {
-        this.name = name;
+        if(name.trim().equals("")) {
+            throw new IllegalArgumentException("The name must not be empty");
+        }
+        this.name = name.trim();
         this.id = id;
     }
 
@@ -97,7 +100,23 @@ public class Playlist {
             this.trackIds.sort(comparator.reversed());
         }
     }
+    public void duplicateTrackRemoval() {
+        int aId = 0;
+        int bId;
+        for(int i = 0; i<this.trackIds.size(); i++){
+            for( int j=i+1; j<this.trackIds.size(); j++){
 
+                boolean isSame = this.tracks.get(this.trackIds.get(i)).equals(this.tracks.get(this.trackIds.get(j)));
+                if(isSame){
+                    System.out.println("Remove " + j + " name " + this.tracks.get(this.trackIds.get(j)).getName());
+                    this.tracks.remove(this.trackIds.get(j));
+                    this.trackIds.remove(j);
+                    j--;
+                }
+
+            }
+        }
+    }
     private int getNextTrackId(){//следующий трек
         return ++trackIdsIterator;
     }

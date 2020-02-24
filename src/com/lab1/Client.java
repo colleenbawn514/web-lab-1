@@ -4,7 +4,7 @@ import java.io.*;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.Arrays;
+import java.util.Locale;
 import java.util.Scanner;
 
 public class Client {
@@ -24,114 +24,131 @@ public class Client {
         return this.task != null;
     }
 
-    public static void main(String[] args) throws RemoteException {
+    public int createPlaylistFromFile(String path, String name) throws RemoteException, FileNotFoundException {
+        double size;
+        int duration;
+        int playlistId = this.task.createPlaylist(name);
+
+        FileReader reader = new FileReader(new File(path));
+        Scanner scan = new Scanner(reader);
+        scan.useLocale(Locale.ENGLISH);
+        if (scan.hasNextLine()) name = scan.nextLine();
+        while (scan.hasNextLine()) {
+            System.out.println("NAME: '"+name+"'");
+            duration = scan.nextInt();
+            size = scan.nextDouble();
+            this.task.addTrack(playlistId, name, size, duration);
+            System.out.println("Add track [name: '" + name + "' size: " + size + "mb duration: " + duration + "sec]");
+            name = scan.nextLine();
+            while (scan.hasNextLine() && name.equals("")) {
+                name = scan.nextLine();
+            }
+        }
+        scan.close();
+        System.out.println("All tracks added!");
+
+        return playlistId;
+    }
+
+    public static void saveErrorLog(String task, String path, Exception e) {
+        try {
+            FileWriter writer = new FileWriter(path, false);
+
+            writer.write("Task: '"+task+"'\n\n");
+            writer.write("Error: ");
+            writer.write((e.getMessage() != null? e.getMessage() : e.toString()) + "\n\n");
+            writer.write("Error stack trace: ");
+            for(StackTraceElement err : e.getStackTrace()) {
+                writer.write(err.toString()+"\n");
+            }
+
+            writer.flush();
+            writer.close();
+            System.out.println("Log saved");
+        } catch (IOException e2) {
+            System.out.println(e2.getMessage());
+        }
+    }
+
+    public void exportPlaylistToFile(int playlistId, String path) {
+        try {
+            FileWriter writer = new FileWriter(path, false);
+
+            int[] tracks = this.task.getPlaylistTrackIdsById(playlistId);
+            for (int id : tracks) {
+                writer.write(this.task.getTrackNameById(playlistId, id) + "\n");
+                writer.write(this.task.getTrackDurationById(playlistId, id) + "\n");
+                writer.write(this.task.getTrackSizeById(playlistId, id) + "\n");
+                writer.append('\n');
+            }
+
+            writer.flush();
+            writer.close();
+            System.out.println("Playlist success export");
+        } catch (IOException e2) {
+            System.out.println("Playlist failed export");
+            System.out.println(e2.getMessage());
+        }
+    }
+
+    public static void main(String[] args) throws RemoteException, FileNotFoundException {
         boolean isExit = false;
         Client client = new Client();
 
         if (client.isConnected()) {
-            Scanner s = new Scanner(System.in);
+            Scanner console = new Scanner(System.in);
             while (!isExit) {
                 System.out.print("> ");
 
-                switch (s.nextLine()) {
-                    case "create p":
+                switch (console.nextLine().trim()) {
+                    case "create p"://создать плейлист
                         System.out.print("Playlist name: ");
-                        client.task.createPlaylist(s.nextLine());
+                        client.task.createPlaylist(console.nextLine());
                         break;
-                    case "create p --file":
+                    case "create p --file"://создать плейлист из файла
                         System.out.print("Path: ");
-                        String path = s.nextLine();
+                        String path = console.nextLine();
                         System.out.print("Playlist name: ");
-                        String name = s.nextLine();
-                        double size;
-                        int duration;
-                        int playlistId = client.task.createPlaylist(name);
-                        try {
-                            FileReader reader = new FileReader(new File(path));
-                            Scanner scan = new Scanner(reader);
-                            while (scan.hasNextLine()) {
-                                name = scan.nextLine();
-                                size = scan.nextDouble();
-                                duration = scan.nextInt();
-                                client.task.addTrack(playlistId, name, size, duration);
-                                System.out.println("Add track [name: '" + name + "' size: " + size + "mb duration: " + duration + "sec]");
-                                scan.nextLine();
-                                if (scan.hasNextLine()) scan.nextLine();
-                            }
-                            scan.close();
-                            System.out.println("All tracks added!");
-                        } catch (FileNotFoundException e) {
-                            System.out.print("File not found. Create [y|n]?: ");
-                            boolean isCreate = s.nextLine().equals("y");
-
-                            if (isCreate) {
-                                try {
-                                    FileWriter writer = new FileWriter(path, false);
-                                    writer.flush();
-                                } catch (IOException e2) {
-                                    System.out.println(e2.getMessage());
-                                }
-                            }
-                        }
-
+                        String name = console.nextLine();
+                        client.createPlaylistFromFile(path, name);
                         break;
-                    case "create t":
+                    case "create t"://создать трек
                         System.out.print("Playlist ID: ");
-                        playlistId = s.nextInt();
+                        int playlistId = console.nextInt();
                         System.out.print("Track name: ");
-                        s.nextLine();
-                        name = s.nextLine();
+                        console.nextLine();
+                        name = console.nextLine();
                         System.out.print("Track size: ");
-                        size = s.nextDouble();
+                        double size = console.nextDouble();
                         System.out.print("Track duration: ");
-                        s.nextLine();
-                        duration = s.nextInt();
-                        s.nextLine();
+                        console.nextLine();
+                        int duration = console.nextInt();
+                        console.nextLine();
                         client.task.addTrack(playlistId, name, size, duration);
                         break;
-                    case "get p --all":
+                    case "get p --all"://вывести все плейлисты
                         int[] playlists = client.task.getPlaylistIds();
                         System.out.println("ID    | Name");
                         for (int id : playlists) {
-                            System.out.println(String.format(
+                            System.out.println(String.format( //форматированные строки
                                     "%-6s| %s",
                                     id,
                                     client.task.getPlaylistNameById(id)
                             ));
                         }
                         break;
-                    case "get p --file":
+                    case "get p --file"://вывести плейлист в файл
                         System.out.print("Playlist ID: ");
-                        playlistId = s.nextInt();
-                        s.nextLine();
+                        playlistId = console.nextInt();
+                        console.nextLine();
                         System.out.print("Path: ");
-                        path = s.nextLine();
-
-                        try {
-                            FileWriter writer = new FileWriter(path, false);
-
-                            int[] tracks = client.task.getPlaylistTrackIdsById(playlistId);
-                            for (int id : tracks) {
-                                writer.write(client.task.getTrackNameById(playlistId, id));
-                                writer.append('\n');
-                                writer.write(client.task.getTrackDurationById(playlistId, id)+"");
-                                writer.append('\n');
-                                writer.write(client.task.getTrackSizeById(playlistId, id)+"");
-                                writer.append('\n');
-                                writer.append('\n');
-                            }
-
-                            writer.flush();
-                            System.out.println("Playlist success export");
-                        } catch (IOException e2) {
-                            System.out.println("Playlist failed export");
-                            System.out.println(e2.getMessage());
-                        }
+                        path = console.nextLine();
+                        client.exportPlaylistToFile(playlistId, path);
                         break;
-                    case "get p":
+                    case "get p"://вывести плейлист
                         System.out.print("Playlist ID: ");
-                        playlistId = s.nextInt();
-                        s.nextLine();
+                        playlistId = console.nextInt();
+                        console.nextLine();
                         System.out.println("Name: '" + client.task.getPlaylistNameById(playlistId) + "'");
 
                         int[] tracks = client.task.getPlaylistTrackIdsById(playlistId);
@@ -146,20 +163,51 @@ public class Client {
                             ));
                         }
                         break;
-                    case "edit p --sort":
+                    case "edit p --sort"://сортировка
                         System.out.print("Playlist ID: ");
-                        playlistId = s.nextInt();
-                        s.nextLine();
+                        playlistId = console.nextInt();
+                        console.nextLine();
                         System.out.print("Sort by Asc [y|n]?: ");
-                        boolean isAsc = s.nextLine().equals("y");
+                        boolean isAsc = console.nextLine().equals("y");
 
                         client.task.sortPlaylist(playlistId, isAsc);
 
                         System.out.println("Playlist sorted by " + (isAsc ? "ASC" : "DESC"));
                         break;
+                    case "edit p --clean":
+                        System.out.print("Playlist ID: ");
+                        playlistId = console.nextInt();
+                        console.nextLine();
+
+                        client.task.duplicateTrackRemovalPlaylist(playlistId);
+                        break;
+                    case "run task":
+                        try {
+                            System.out.print("Path: ");
+                            path = console.nextLine();
+                            System.out.print("Playlist name: ");
+                            name = console.nextLine();
+                            playlistId = client.createPlaylistFromFile(path, name);
+
+                            client.task.duplicateTrackRemovalPlaylist(playlistId);
+
+                            System.out.print("Sort by Asc [y|n]?: ");
+                            isAsc = console.nextLine().equals("y");
+
+                            client.task.sortPlaylist(playlistId, isAsc);
+
+                            System.out.print("Save path [" + client.task.getPlaylistNameById(playlistId) + "]: ");
+                            path = console.nextLine();
+                            client.exportPlaylistToFile(playlistId, path.equals("") ? client.task.getPlaylistNameById(playlistId) : path);
+                        } catch (Exception e) {
+                            System.out.print("Error! Save log path[log.txt]: ");
+                            path = console.nextLine();
+                            saveErrorLog("run task", path.equals("")? "log.txt" : path, e);
+                        }
+                        break;
                     case "exit":
                         isExit = true;
-                        s.close();
+                        console.close();
                         break;
                     default:
                         System.out.println("Unknown command");
