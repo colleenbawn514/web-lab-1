@@ -94,7 +94,7 @@ public class Client {
     public static void main(String[] args) throws RemoteException, FileNotFoundException {
         boolean isExit = false;
         Client client = new Client();
-
+        System.out.print("Для выполнения задания напишите 'run task' или 'help' чтобы посмотреть помощь");
         if (client.isConnected()) {
             Scanner console = new Scanner(System.in);
             while (!isExit) {
@@ -174,7 +174,7 @@ public class Client {
 
                         System.out.println("Playlist sorted by " + (isAsc ? "ASC" : "DESC"));
                         break;
-                    case "edit p --clean":
+                    case "edit p --duplicate-remove":
                         System.out.print("Playlist ID: ");
                         playlistId = console.nextInt();
                         console.nextLine();
@@ -204,6 +204,18 @@ public class Client {
                             path = console.nextLine();
                             saveErrorLog("run task", path.equals("")? "log.txt" : path, e);
                         }
+                        break;
+                    case "help":
+                        System.out.print("create p                      Создать плейлист \n");
+                        System.out.print("create p --file               Создать плейлист из файла \n");
+                        System.out.print("create t                      Создать трек \n");
+                        System.out.print("get p                         Вывести плейлист \n");
+                        System.out.print("get p --all                   Вывести все плейлисты \n");
+                        System.out.print("get p --file                  Вывести плейлист в файл \n");
+                        System.out.print("edit p --sort                 Сортировка плейлиста \n");
+                        System.out.print("edit p --duplicate-remove     Удаление дупликатов \n");
+                        System.out.print("run task                      Выполнение задания лабораторной \n");
+                        System.out.print("exit                          Выход \n");
                         break;
                     case "exit":
                         isExit = true;
