@@ -1,6 +1,7 @@
 package com.lab1.client;
 
 import com.lab1.common.Playlist;
+import com.lab1.exception.PlaylistNotFoundException;
 import com.lab1.interfaces.*;
 import com.lab1.common.Track;
 
@@ -14,14 +15,12 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class Client {
-    private ServerRMI server;
     private PlaylistManagerRMI playlistManager;
     private TrackManagerRMI trackManager;
 
     public Client() {
         try {
             Registry registry = LocateRegistry.getRegistry(null, 80);
-            this.server = (ServerRMI) registry.lookup("server");
             this.playlistManager = (PlaylistManagerRMI) registry.lookup("playlist");
             this.trackManager = (TrackManagerRMI) registry.lookup("track");
         } catch (Exception e) {
@@ -31,10 +30,10 @@ public class Client {
     }
 
     public boolean isConnected() {
-        return this.server != null || this.playlistManager != null || this.trackManager != null;
+        return this.playlistManager != null || this.trackManager != null;
     }
 
-    public Playlist createPlaylistFromFile(String path, String name) throws FileNotFoundException, RemoteException {
+    public Playlist createPlaylistFromFile(String path, String name) throws FileNotFoundException, RemoteException, PlaylistNotFoundException {
         double size;
         int duration;
         String artist = "";
@@ -99,13 +98,13 @@ public class Client {
             writer.flush();
             writer.close();
             System.out.println("Playlist success export");
-        } catch (IOException e2) {
+        } catch (IOException | PlaylistNotFoundException e2) {
             System.out.println("Playlist failed export");
             System.out.println(e2.getMessage());
         }
     }
 
-    public static void main(String[] args) throws RemoteException, FileNotFoundException, ClassNotFoundException {
+    public static void main(String[] args) throws RemoteException, FileNotFoundException, ClassNotFoundException, PlaylistNotFoundException {
         boolean isExit = false;
         Client client = new Client();
         System.out.println("Для выполнения задания напишите 'run task' или 'help' чтобы посмотреть помощь");
