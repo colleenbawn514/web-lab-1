@@ -5,6 +5,8 @@ import com.lab1.exception.TrackNotFoundException;
 import com.lab1.interfaces.PlaylistManagerRemote;
 import com.lab1.common.Playlist;
 import com.lab1.common.Track;
+
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -70,12 +72,11 @@ public class PlaylistLibrary implements PlaylistManagerRemote {
     }
 
     public void removeDuplicate(int playlistId) throws PlaylistNotFoundException, TrackNotFoundException {
+        ArrayList<Integer> tracks = this.get(playlistId).getTrackIds();
         for (int i = 0; i < this.get(playlistId).getSize(); i++) {
             for (int j = i + 1; j < this.get(playlistId).getSize(); j++) {
-
-                boolean isSame = this.tracks.get(i).equals(this.tracks.get(j));
-                if (isSame) {
-                    System.out.println("Remove " + j + " name " + this.tracks.get(j).getName());
+                if (tracks.get(i).equals(tracks.get(j))) {
+                    System.out.println("Remove " + tracks.get(i) + " name " + this.tracks.get(tracks.get(i)).getName());
                     this.removeTrack(playlistId, j);
                     j--;
                 }

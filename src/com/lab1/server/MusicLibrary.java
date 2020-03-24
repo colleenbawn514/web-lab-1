@@ -25,8 +25,8 @@ public class MusicLibrary implements TrackManagerRemote {
                 return track;
             }
         }
-        Track track = new Track(artist, name, size, duration, maxId);
-        this.tracks.put(maxId, track);
+        Track track = new Track(artist, name, size, duration, this.maxId);
+        this.tracks.put(this.maxId, track);
         this.maxId += 1;
         return track;
     }

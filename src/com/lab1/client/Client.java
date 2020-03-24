@@ -84,11 +84,11 @@ public class Client extends ClientConnection {
 
                         ArrayList<Integer> tracks = client.playlist.get(playlistId).getTrackIds();
                         System.out.println(tracks.size());
-                        System.out.println("ID    | Artist         | Name             | Duration(Sec)     | Size(MB)");
+                        System.out.println("ID  | Artist                | Name                  | Duration(Sec)     | Size(MB)");
                         for (int id : tracks) {
                             track = client.track.get(id);
                             System.out.println(String.format(
-                                    "%-6s| %-14s | %-16s | %-17s | %s",
+                                    "%-4s| %-21s | %-21s | %-17s | %s",
                                     id,
                                     track.getArtist(),
                                     track.getName(),
