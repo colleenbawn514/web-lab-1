@@ -18,7 +18,7 @@ public class Client extends ClientConnection {
         this.utils = new Utils(this);
     }
 
-    public static void main(String[] args) throws RemoteException, FileNotFoundException, ClassNotFoundException, PlaylistNotFoundException, TrackNotFoundException {
+    public static void main(String[] args) throws RemoteException, FileNotFoundException, PlaylistNotFoundException, TrackNotFoundException {
         boolean isExit = false;
         Client client = new Client();
         System.out.println("Для выполнения задания напишите 'run task' или 'help' чтобы посмотреть помощь");
