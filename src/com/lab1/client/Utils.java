@@ -2,8 +2,10 @@ package com.lab1.client;
 
 import com.lab1.common.Playlist;
 import com.lab1.common.Track;
+import com.lab1.common.User;
 import com.lab1.exception.PlaylistNotFoundException;
 import com.lab1.exception.TrackNotFoundException;
+import com.lab1.exception.UserNotFoundException;
 import com.lab1.interfaces.PlaylistManagerRemote;
 import com.lab1.interfaces.TrackManagerRemote;
 
@@ -22,12 +24,12 @@ public class Utils {
         this.track = client.track;
     }
 
-    public Playlist createPlaylistFromFile(String path, String name) throws FileNotFoundException, RemoteException, PlaylistNotFoundException {
+    public Playlist createPlaylistFromFile(User user, String path, String name) throws FileNotFoundException, RemoteException, PlaylistNotFoundException, UserNotFoundException {
         double size;
         int duration;
         String artist = "";
         String trackName;
-        Playlist playlist = this.playlist.create(name);
+        Playlist playlist = this.playlist.create(user.getId(), name);
 
         System.out.println("Create playlist [ID: " + playlist.getId() + ", Name: " + playlist.getName() + "]");
 
@@ -44,7 +46,7 @@ public class Utils {
             size = scan.nextDouble();
             //Track
             Track track = this.track.create(artist, trackName, size, duration);
-            this.playlist.addTrack(playlist.getId(), track);
+            this.playlist.addTrack(user.getId(), playlist.getId(), track);
             System.out.println("Add track [artist: '" + artist + "' name: '" + trackName + "' size: " + size + "mb duration: " + duration + "sec]");
         }
         scan.close();
@@ -53,10 +55,10 @@ public class Utils {
         return playlist;
     }
 
-    public void exportPlaylistToFile(int playlistId, String path) {
+    public void exportPlaylistToFile(User user, int playlistId, String path) {
         try {
             FileWriter writer = new FileWriter(path, false);
-            ArrayList<Integer> tracks = this.playlist.get(playlistId).getTrackIds();
+            ArrayList<Integer> tracks = this.playlist.get(user.getId(), playlistId).getTrackIds();
             for (int id : tracks) {
                 Track track = this.track.get(id);
                 writer.write(track.getArtist() + "\n");
@@ -69,7 +71,7 @@ public class Utils {
             writer.flush();
             writer.close();
             System.out.println("Playlist success export");
-        } catch (IOException | PlaylistNotFoundException | TrackNotFoundException e2) {
+        } catch (IOException | PlaylistNotFoundException | TrackNotFoundException | UserNotFoundException e2) {
             System.out.println("Playlist failed export");
             System.out.println(e2.getMessage());
         }

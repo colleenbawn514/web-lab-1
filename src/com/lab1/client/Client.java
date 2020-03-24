@@ -1,9 +1,13 @@
 package com.lab1.client;
 
 import com.lab1.common.Playlist;
+import com.lab1.common.User;
 import com.lab1.exception.PlaylistNotFoundException;
 import com.lab1.exception.TrackNotFoundException;
 import com.lab1.common.Track;
+import com.lab1.exception.UserNotFoundException;
+
+import javax.naming.AuthenticationException;
 import java.io.*;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -18,30 +22,67 @@ public class Client extends ClientConnection {
         this.utils = new Utils(this);
     }
 
-    public static void main(String[] args) throws RemoteException, FileNotFoundException, PlaylistNotFoundException, TrackNotFoundException {
+    public static void main(String[] args) throws RemoteException, FileNotFoundException, PlaylistNotFoundException, TrackNotFoundException, UserNotFoundException {
         boolean isExit = false;
         Client client = new Client();
-        System.out.println("Для выполнения задания напишите 'run task' или 'help' чтобы посмотреть помощь");
+        User user = null;
         if (client.isConnected()) {
             Scanner console = new Scanner(System.in);
+            System.out.println("Войдите или зарегестрируйтесь");
+            while (user == null) {
+                System.out.print("Логин: ");
+                String userLogin = console.nextLine();
+                boolean isExistUser = client.user.isExistUser(userLogin);
+                if (isExistUser) {
+                    System.out.print("Пароль: ");
+                } else {
+                    System.out.print("Такого пользователя еще нет, зарегестрировать [y|n]?: ");
+                    if (!console.nextLine().equals("y")) {
+                        System.out.println("Войдите в систему");
+                        continue;
+                    }
+                    System.out.print("Для регистрации введите пароль: ");
+                }
+                String userPassword = console.nextLine();
+                if (!isExistUser) {
+                    System.out.print("Введите ваше имя: ");
+                    String userName = console.nextLine();
+
+                    try {
+                        user = client.user.create(userLogin, userPassword, userName);
+                    }catch (IllegalArgumentException e){
+                        System.err.println(e.getMessage());
+                        System.out.println("Ошибка созадния пользователя. Попробуйте снова");
+                    }
+                } else {
+                    try {
+                        user = client.user.get(userLogin, userPassword);
+                    }catch (UserNotFoundException | AuthenticationException e){
+                        System.err.println(e.getMessage());
+                        System.out.println("Попробуйте снова");
+                    }
+                }
+            }
+            System.out.println("Добро пожаловать, "+user.getName());
+            System.out.println("Для выполнения задания напишите 'run task' или 'help' чтобы посмотреть помощь");
             while (!isExit) {
                 System.out.print("> ");
 
                 switch (console.nextLine().trim()) {
                     case "create p"://создать плейлист
                         System.out.print("Playlist name: ");
-                        client.playlist.create(console.nextLine());
+                        client.playlist.create(user.getId(), console.nextLine());
                         break;
                     case "create p --file"://создать плейлист из файла
                         System.out.print("Path: ");
                         String path = console.nextLine();
                         System.out.print("Playlist name: ");
                         String name = console.nextLine();
-                        client.utils.createPlaylistFromFile(path, name);
+                        client.utils.createPlaylistFromFile(user, path, name);
                         break;
                     case "create t"://создать трек
                         System.out.print("Playlist ID: ");
-                        Playlist playlist = client.playlist.get(console.nextInt());
+                        Playlist playlist = client.playlist.get(user.getId(), console.nextInt());
                         System.out.print("Track artist: ");
                         console.nextLine();
                         String artist = console.nextLine();
@@ -54,10 +95,10 @@ public class Client extends ClientConnection {
                         int duration = console.nextInt();
                         console.nextLine();
                         Track track = client.track.create(artist, name, size, duration);
-                        client.playlist.addTrack(playlist.getId(), track);
+                        client.playlist.addTrack(user.getId(), playlist.getId(), track);
                         break;
                     case "get p --all"://вывести все плейлисты
-                        Map<Integer, String> playlistsInfo = client.playlist.getAll();
+                        Map<Integer, String> playlistsInfo = client.playlist.getAll(user.getId());
                         System.out.println("ID    | Name");
                         for (int id : playlistsInfo.keySet()) {
                             System.out.println(String.format( //форматированные строки
@@ -73,16 +114,16 @@ public class Client extends ClientConnection {
                         console.nextLine();
                         System.out.print("Path: ");
                         path = console.nextLine();
-                        client.utils.exportPlaylistToFile(playlistId, path);
+                        client.utils.exportPlaylistToFile(user, playlistId, path);
                         break;
                     case "get p"://вывести плейлист
                         System.out.print("Playlist ID: ");
                         playlistId = console.nextInt();
                         console.nextLine();
-                        playlist = client.playlist.get(playlistId);
+                        playlist = client.playlist.get(user.getId(), playlistId);
                         System.out.println("Name: '" + playlist.getName() + "'");
 
-                        ArrayList<Integer> tracks = client.playlist.get(playlistId).getTrackIds();
+                        ArrayList<Integer> tracks = client.playlist.get(user.getId(), playlistId).getTrackIds();
                         System.out.println(tracks.size());
                         System.out.println("ID  | Artist                | Name                  | Duration(Sec)     | Size(MB)");
                         for (int id : tracks) {
@@ -104,7 +145,7 @@ public class Client extends ClientConnection {
                         System.out.print("Sort by Asc [y|n]?: ");
                         boolean isAsc = console.nextLine().equals("y");
 
-                        client.playlist.sort(playlistId, isAsc);
+                        client.playlist.sort(user.getId(), playlistId, isAsc);
 
                         System.out.println("Playlist sorted by " + (isAsc ? "ASC" : "DESC"));
                         break;
@@ -113,7 +154,7 @@ public class Client extends ClientConnection {
                         playlistId = console.nextInt();
                         console.nextLine();
 
-                        client.playlist.removeDuplicate(playlistId);
+                        client.playlist.removeDuplicate(user.getId(), playlistId);
                         break;
                     case "run task":
                         try {
@@ -121,18 +162,18 @@ public class Client extends ClientConnection {
                             path = console.nextLine();
                             System.out.print("Playlist name: ");
                             name = console.nextLine();
-                            playlist = client.utils.createPlaylistFromFile(path, name);
+                            playlist = client.utils.createPlaylistFromFile(user, path, name);
 
-                            client.playlist.removeDuplicate(playlist.getId());
+                            client.playlist.removeDuplicate(user.getId(), playlist.getId());
 
                             System.out.print("Sort by Asc [y|n]?: ");
                             isAsc = console.nextLine().equals("y");
 
-                            client.playlist.sort(playlist.getId(), isAsc);
+                            client.playlist.sort(user.getId(), playlist.getId(), isAsc);
 
                             System.out.print("Save path [" + playlist.getName() + "]: ");
                             path = console.nextLine();
-                            client.utils.exportPlaylistToFile(playlist.getId(), path.equals("") ? playlist.getName() : path);
+                            client.utils.exportPlaylistToFile(user, playlist.getId(), path.equals("") ? playlist.getName() : path);
                         } catch (Exception e) {
                             System.out.print("Error! Save log path[log.txt]: ");
                             path = console.nextLine();

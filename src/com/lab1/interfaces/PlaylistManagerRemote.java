@@ -7,15 +7,15 @@ import java.rmi.RemoteException;
 import java.util.Map;
 
 public interface PlaylistManagerRemote extends Remote {
-    Playlist create(String name) throws RemoteException, IllegalArgumentException;
+    Playlist create(int userId, String name) throws RemoteException, IllegalArgumentException, UserNotFoundException;
 
-    Playlist get(int playlistId) throws RemoteException, PlaylistNotFoundException;
+    Playlist get(int userId, int playlistId) throws RemoteException, PlaylistNotFoundException, UserNotFoundException;
 
-    Map<Integer, String> getAll() throws RemoteException, PlaylistNotFoundException;
+    Map<Integer, String> getAll(int userId) throws RemoteException, PlaylistNotFoundException, UserNotFoundException;
 
-    void addTrack(int playlistId, Track track) throws RemoteException, PlaylistNotFoundException;
+    void addTrack(int userId, int playlistId, Track track) throws RemoteException, PlaylistNotFoundException, UserNotFoundException;
 
-    void sort(int playlistId, boolean isAsc) throws RemoteException, PlaylistNotFoundException;
+    void sort(int userId, int playlistId, boolean isAsc) throws RemoteException, PlaylistNotFoundException, UserNotFoundException;
 
-    void removeDuplicate(int playlistId) throws RemoteException, PlaylistNotFoundException, TrackNotFoundException;
+    void removeDuplicate(int userId, int playlistId) throws RemoteException, PlaylistNotFoundException, TrackNotFoundException, UserNotFoundException;
 }
