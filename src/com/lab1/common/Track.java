@@ -2,6 +2,7 @@ package com.lab1.common;
 import com.lab1.interfaces.TrackRMI;
 
 import java.io.*;
+import java.rmi.RemoteException;
 
 public class Track implements Serializable, TrackRMI {
     private static final long serialVersionUID = 1;
@@ -31,7 +32,7 @@ public class Track implements Serializable, TrackRMI {
             throw new IllegalArgumentException("Size must be positive and greater than zero");
         }
         this.size = size;
-        if(id <= 0) {
+        if(id < 0) {
             throw new IllegalArgumentException("Id must be positive and greater than zero");
         }
         this.id = id;
@@ -41,34 +42,34 @@ public class Track implements Serializable, TrackRMI {
         this.duration = duration;
     }
 
-    public String getName() {
-        return this.name;
+    public int getId() {
+        return this.id;
     }
 
     public String getArtist() {
         return this.artist;
     }
 
-    public double getSize() {
-        return this.size;
-    }
-
-    public int getId() {
-        return this.id;
+    public String getName() {
+        return this.name;
     }
 
     public int getDuration() {
         return this.duration;
     }
 
-    public boolean equals(Track track) {
-        return isEqual(track.artist, track.name, track.size, track.duration);
+    public double getSize() {
+        return this.size;
     }
 
-    public boolean isEqual(String artist, String name, double size, int duration) {
-        return this.name.equals(name)
-                && this.duration == duration
-                && this.size == size
-                && this.artist.equals(artist);
+    public boolean equals(Track track) {
+        return isEqual(track.artist, track.name, track.duration, track.size);
+    }
+
+    public boolean isEqual(String artist, String name, int duration, double size) {
+        return this.artist.equals(artist)
+            && this.name.equals(name)
+            && this.duration == duration
+            && this.size == size;
     }
 }

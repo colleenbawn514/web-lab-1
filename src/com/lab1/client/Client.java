@@ -2,109 +2,23 @@ package com.lab1.client;
 
 import com.lab1.common.Playlist;
 import com.lab1.exception.PlaylistNotFoundException;
-import com.lab1.interfaces.*;
+import com.lab1.exception.TrackNotFoundException;
 import com.lab1.common.Track;
-
 import java.io.*;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.util.ArrayList;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Scanner;
 
-public class Client {
-    private PlaylistManagerRMI playlistManager;
-    private TrackManagerRMI trackManager;
+public class Client extends ClientConnection {
+    public Utils utils;
 
     public Client() {
-        try {
-            Registry registry = LocateRegistry.getRegistry(null, 80);
-            this.playlistManager = (PlaylistManagerRMI) registry.lookup("playlist");
-            this.trackManager = (TrackManagerRMI) registry.lookup("track");
-        } catch (Exception e) {
-            System.err.println("Client exception: " + e.toString());
-            e.printStackTrace();
-        }
+        super();
+        this.utils = new Utils(this);
     }
 
-    public boolean isConnected() {
-        return this.playlistManager != null || this.trackManager != null;
-    }
-
-    public Playlist createPlaylistFromFile(String path, String name) throws FileNotFoundException, RemoteException, PlaylistNotFoundException {
-        double size;
-        int duration;
-        String artist = "";
-        String trackName;
-        Playlist playlist = this.playlistManager.create(name);
-
-        FileReader reader = new FileReader(new File(path));
-        Scanner scan = new Scanner(reader);
-        scan.useLocale(Locale.ENGLISH);
-        if (scan.hasNextLine()) artist = scan.nextLine();
-        while (scan.hasNextLine()) {
-            trackName = scan.nextLine();
-            duration = scan.nextInt();
-            size = scan.nextDouble();
-            //Track
-            Track track = this.trackManager.create(artist, trackName, size, duration);
-            playlistManager.addTrack(playlist.getId(), track);
-            System.out.println("Add track [artist: '" + artist + "' name: '" + name + "' size: " + size + "mb duration: " + duration + "sec]");
-            artist = scan.nextLine();
-            while (scan.hasNextLine() && artist.equals("")) {
-                artist = scan.nextLine();
-            }
-        }
-        scan.close();
-        System.out.println("All tracks added!");
-
-        return playlist;
-    }
-
-    public static void saveErrorLog(String task, String path, Exception e) {
-        try {
-            FileWriter writer = new FileWriter(path, false);
-
-            writer.write("Task: '" + task + "'\n\n");
-            writer.write("Error: ");
-            writer.write((e.getMessage() != null ? e.getMessage() : e.toString()) + "\n\n");
-            writer.write("Error stack trace: ");
-            for (StackTraceElement err : e.getStackTrace()) {
-                writer.write(err.toString() + "\n");
-            }
-
-            writer.flush();
-            writer.close();
-            System.out.println("Log saved");
-        } catch (IOException e2) {
-            System.out.println(e2.getMessage());
-        }
-    }
-
-    public void exportPlaylistToFile(int playlistId, String path) {
-        try {
-            FileWriter writer = new FileWriter(path, false);
-            Map<Integer, Track> tracks = this.playlistManager.getTracks(playlistId);
-            for (int id : tracks.keySet()) {
-                writer.write(tracks.get(id).getArtist() + "\n");
-                writer.write(tracks.get(id).getName() + "\n");
-                writer.write(tracks.get(id).getDuration() + "\n");
-                writer.write(tracks.get(id).getSize() + "\n");
-                writer.append('\n');
-            }
-
-            writer.flush();
-            writer.close();
-            System.out.println("Playlist success export");
-        } catch (IOException | PlaylistNotFoundException e2) {
-            System.out.println("Playlist failed export");
-            System.out.println(e2.getMessage());
-        }
-    }
-
-    public static void main(String[] args) throws RemoteException, FileNotFoundException, ClassNotFoundException, PlaylistNotFoundException {
+    public static void main(String[] args) throws RemoteException, FileNotFoundException, ClassNotFoundException, PlaylistNotFoundException, TrackNotFoundException {
         boolean isExit = false;
         Client client = new Client();
         System.out.println("Для выполнения задания напишите 'run task' или 'help' чтобы посмотреть помощь");
@@ -116,18 +30,18 @@ public class Client {
                 switch (console.nextLine().trim()) {
                     case "create p"://создать плейлист
                         System.out.print("Playlist name: ");
-                        client.playlistManager.create(console.nextLine());
+                        client.playlist.create(console.nextLine());
                         break;
                     case "create p --file"://создать плейлист из файла
                         System.out.print("Path: ");
                         String path = console.nextLine();
                         System.out.print("Playlist name: ");
                         String name = console.nextLine();
-                        client.createPlaylistFromFile(path, name);
+                        client.utils.createPlaylistFromFile(path, name);
                         break;
                     case "create t"://создать трек
                         System.out.print("Playlist ID: ");
-                        Playlist playlist = client.playlistManager.get(console.nextInt());
+                        Playlist playlist = client.playlist.get(console.nextInt());
                         System.out.print("Track artist: ");
                         console.nextLine();
                         String artist = console.nextLine();
@@ -139,17 +53,17 @@ public class Client {
                         console.nextLine();
                         int duration = console.nextInt();
                         console.nextLine();
-                        Track track = client.trackManager.create(artist, name, size, duration);
-                        client.playlistManager.addTrack(playlist.getId(), track);
+                        Track track = client.track.create(artist, name, size, duration);
+                        client.playlist.addTrack(playlist.getId(), track);
                         break;
                     case "get p --all"://вывести все плейлисты
-                        ArrayList<Integer> playlists = client.playlistManager.getAllIds();
+                        Map<Integer, String> playlistsInfo = client.playlist.getAll();
                         System.out.println("ID    | Name");
-                        for (int id : playlists) {
+                        for (int id : playlistsInfo.keySet()) {
                             System.out.println(String.format( //форматированные строки
                                     "%-6s| %s",
                                     id,
-                                    client.playlistManager.get(id).getName()
+                                    playlistsInfo.get(id)
                             ));
                         }
                         break;
@@ -159,26 +73,27 @@ public class Client {
                         console.nextLine();
                         System.out.print("Path: ");
                         path = console.nextLine();
-                        client.exportPlaylistToFile(playlistId, path);
+                        client.utils.exportPlaylistToFile(playlistId, path);
                         break;
                     case "get p"://вывести плейлист
                         System.out.print("Playlist ID: ");
                         playlistId = console.nextInt();
                         console.nextLine();
-                        playlist = client.playlistManager.get(playlistId);
+                        playlist = client.playlist.get(playlistId);
                         System.out.println("Name: '" + playlist.getName() + "'");
 
-                        Map<Integer, Track> tracks = client.playlistManager.getTracks(playlistId);
+                        ArrayList<Integer> tracks = client.playlist.get(playlistId).getTrackIds();
                         System.out.println(tracks.size());
                         System.out.println("ID    | Artist         | Name             | Duration(Sec)     | Size(MB)");
-                        for (int id : tracks.keySet()) {
+                        for (int id : tracks) {
+                            track = client.track.get(id);
                             System.out.println(String.format(
                                     "%-6s| %-14s | %-16s | %-17s | %s",
                                     id,
-                                    tracks.get(id).getArtist(),
-                                    tracks.get(id).getName(),
-                                    tracks.get(id).getDuration(),
-                                    tracks.get(id).getSize()
+                                    track.getArtist(),
+                                    track.getName(),
+                                    track.getDuration(),
+                                    track.getSize()
                             ));
                         }
                         break;
@@ -189,7 +104,7 @@ public class Client {
                         System.out.print("Sort by Asc [y|n]?: ");
                         boolean isAsc = console.nextLine().equals("y");
 
-                        client.playlistManager.sort(playlistId, isAsc);
+                        client.playlist.sort(playlistId, isAsc);
 
                         System.out.println("Playlist sorted by " + (isAsc ? "ASC" : "DESC"));
                         break;
@@ -198,7 +113,7 @@ public class Client {
                         playlistId = console.nextInt();
                         console.nextLine();
 
-                        client.playlistManager.removeDuplicate(playlistId);
+                        client.playlist.removeDuplicate(playlistId);
                         break;
                     case "run task":
                         try {
@@ -206,22 +121,22 @@ public class Client {
                             path = console.nextLine();
                             System.out.print("Playlist name: ");
                             name = console.nextLine();
-                            playlist = client.createPlaylistFromFile(path, name);
+                            playlist = client.utils.createPlaylistFromFile(path, name);
 
-                            client.playlistManager.removeDuplicate(playlist.getId());
+                            client.playlist.removeDuplicate(playlist.getId());
 
                             System.out.print("Sort by Asc [y|n]?: ");
                             isAsc = console.nextLine().equals("y");
 
-                            client.playlistManager.sort(playlist.getId(), isAsc);
+                            client.playlist.sort(playlist.getId(), isAsc);
 
                             System.out.print("Save path [" + playlist.getName() + "]: ");
                             path = console.nextLine();
-                            client.exportPlaylistToFile(playlist.getId(), path.equals("") ? playlist.getName() : path);
+                            client.utils.exportPlaylistToFile(playlist.getId(), path.equals("") ? playlist.getName() : path);
                         } catch (Exception e) {
                             System.out.print("Error! Save log path[log.txt]: ");
                             path = console.nextLine();
-                            saveErrorLog("run task", path.equals("") ? "log.txt" : path, e);
+                            Utils.saveErrorLog("run task", path.equals("") ? "log.txt" : path, e);
                         }
                         break;
                     case "help":

@@ -1,35 +1,35 @@
 package com.lab1.server;
 
-import com.lab1.interfaces.PlaylistManagerRMI;
-import com.lab1.interfaces.TrackManagerRMI;
-
+import com.lab1.interfaces.PlaylistManagerRemote;
+import com.lab1.interfaces.TrackManagerRemote;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 
 public class Server{
-    private final MusicLibrary library;
+    private final MusicLibrary musicLibrary;
+    private final PlaylistLibrary playlistLibrary;
     static private final int SERVER_PORT = 80;
 
     public Server() {
-        this.library = new MusicLibrary();
+        this.musicLibrary = new MusicLibrary();
+        this.playlistLibrary = new PlaylistLibrary(this.musicLibrary);
     }
 
     public static void main(String[] args) {
         Server server = new Server();
-        TrackManager trackRemote = new TrackManager(server.library);
-        PlaylistManager playlistRemote = new PlaylistManager(server.library);
-
         try {
             //Создаем заглушку объекта для отправки клиенту
-            PlaylistManagerRMI stubPlaylist = (PlaylistManagerRMI) UnicastRemoteObject.exportObject(playlistRemote, 0);
-            TrackManagerRMI stubTrack = (TrackManagerRMI) UnicastRemoteObject.exportObject(trackRemote, 0);
+            TrackManagerRemote stubMusicLibrary = (TrackManagerRemote)
+                UnicastRemoteObject.exportObject(server.musicLibrary, 0);
+            PlaylistManagerRemote stubPlaylistLibrary = (PlaylistManagerRemote)
+                UnicastRemoteObject.exportObject(server.playlistLibrary, 0);
 
             //Регистрируем объект
             Registry registry = LocateRegistry.createRegistry(SERVER_PORT);
             //Связываем объект с индификатором
-            registry.bind("playlist", stubPlaylist);
-            registry.bind("track", stubTrack);
+            registry.bind("tracksLibrary", stubMusicLibrary);
+            registry.bind("playlistsLibrary", stubPlaylistLibrary);
 
             System.out.println("Server start on port " + SERVER_PORT);
         } catch (Exception e) {
