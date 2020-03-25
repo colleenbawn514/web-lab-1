@@ -33,6 +33,26 @@ public class User implements Serializable, UserRMI {
         this.playlistIds = new ArrayList<>();
     }
 
+    public User(int id, String login, String password, String name, ArrayList<Integer> playlistIds) {
+        this.id = id;
+        if (login.trim().equals("")) {
+            throw new IllegalArgumentException("The login must not be empty");
+        }
+        this.login = login.trim();
+        if (password.trim().equals("")) {
+            throw new IllegalArgumentException("The password must not be empty");
+        }
+        if (password.trim().length() < 5) {
+            throw new IllegalArgumentException("The password length must be more 5 symbols");
+        }
+        this.password = password.trim();
+        if (name.trim().equals("")) {
+            throw new IllegalArgumentException("The name must not be empty");
+        }
+        this.name = name.trim();
+        this.playlistIds = new ArrayList<>(playlistIds);
+    }
+
     public int getId() {
         return this.id;
     }

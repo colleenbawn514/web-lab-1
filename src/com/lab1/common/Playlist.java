@@ -21,6 +21,18 @@ public class Playlist implements Serializable, PlaylistRMI {
         this.name = name.trim();
     }
 
+    public Playlist(String name, int id, ArrayList<Integer> trackIds) {
+        if(id < 0) {
+            throw new IllegalArgumentException("Id must be positive and greater than zero");
+        }
+        this.id = id;
+        if (name.trim().equals("")) {
+            throw new IllegalArgumentException("The name must not be empty");
+        }
+        this.name = name.trim();
+        this.trackIds = trackIds;
+    }
+
     public int getId() {
         return this.id;
     }

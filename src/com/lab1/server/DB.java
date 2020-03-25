@@ -6,7 +6,6 @@ public class DB {
     public Connection conn;
     public Statement statmt;
     public ResultSet resSet;
-    public String nameDB;
 
     public DB(String nameDB) throws ClassNotFoundException, SQLException {
         conn = null;

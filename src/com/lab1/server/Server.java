@@ -7,22 +7,25 @@ import com.lab1.interfaces.UserManagerRemote;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
+import java.sql.SQLException;
 
 public class Server{
     private final MusicLibrary musicLibrary;
     private final PlaylistLibrary playlistLibrary;
     private final UserLibrary userLibrary;
+    private final DB db;
     static private final int SERVER_PORT = 80;
 
-    public Server() {
-        this.musicLibrary = new MusicLibrary();
-        this.userLibrary = new UserLibrary();
-        this.playlistLibrary = new PlaylistLibrary(this.musicLibrary, this.userLibrary);
+    public Server() throws ClassNotFoundException, SQLException {
+        this.db = DB.connection("colleen.music");
+        this.musicLibrary = new MusicLibrary(this.db);
+        this.userLibrary = new UserLibrary(this.db);
+        this.playlistLibrary = new PlaylistLibrary(this.musicLibrary, this.userLibrary, this.db);
     }
 
     public static void main(String[] args) {
-        Server server = new Server();
         try {
+            Server server = new Server();
             //Создаем заглушку объекта для отправки клиенту
             TrackManagerRemote stubMusicLibrary = (TrackManagerRemote)
                 UnicastRemoteObject.exportObject(server.musicLibrary, 0);
