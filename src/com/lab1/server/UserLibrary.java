@@ -29,44 +29,16 @@ public class UserLibrary implements UserManagerRemote {
                             "   id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                             "   login VARCHAR(20), " +
                             "   password VARCHAR(20), " +
-                            "   name VARCHAR(20), " +
-                            "   playlists TEXT " +
+                            "   name VARCHAR(20) " +
                             " )"
             );
-
-            ResultSet result = this.db.executeQuery("SELECT * FROM `users`");
-            int size = 0;
-
-            System.out.println("Load users");
-            while (result.next()) {
-                int count = result.getMetaData().getColumnCount();
-                for (int i=1; i<count+1; i++){
-                    System.out.print(result.getString(i)+"  |  ");
-                }
-                System.out.println();
-
-                ArrayList<Integer> playlistIds = new ArrayList<>();
-                if (result.getString(5).length() != 0) {
-                    for (String id : result.getString(5).split(",")) {
-                        playlistIds.add(Integer.parseInt(id));
-                    }
-                }
-                User user = new User(
-                        Integer.parseInt(result.getString(1)),
-                        result.getString(2),
-                        result.getString(3),
-                        result.getString(4),
-                        playlistIds
-                );
-                size += 1;
-                this.usersByLogin.put(user.getLogin(), user);
-                this.usersById.put(user.getId(), user);
-            }
-            result = this.db.executeQuery("SELECT MAX(id) FROM `users`");
-            if (result.getString(1) != null) {
-                this.maxId = Integer.parseInt(result.getString(1)) + 1;
-            }
-            System.out.println("Load " + size + " users to cache");
+            this.db.execute(
+                    "CREATE TABLE IF NOT EXISTS `usersPlaylists` ( " +
+                            "   id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                            "   playlistId INTEGER, " +
+                            "   userId INTEGER " +
+                            " )"
+            );
         } catch (SQLException e) {
             System.err.println("Error get tracks from db");
             e.printStackTrace();
@@ -80,10 +52,11 @@ public class UserLibrary implements UserManagerRemote {
         try {
             this.db.execute(
                     "INSERT INTO `users` " +
-                            "    (login, password, name, playlists) " +
+                            "    (login, password, name) " +
                             "VALUES " +
-                            "    ('" + login + "', '" + password + "', '" + name + "', '');"
+                            "    ('" + login + "', '" + password + "', '" + name + "');"
             );
+            System.out.println("User create login: "+ login);
         } catch (SQLException e) {
             System.err.println("Error write do db");
             e.printStackTrace();
@@ -94,53 +67,146 @@ public class UserLibrary implements UserManagerRemote {
     }
 
     public User get(int userId) throws UserNotFoundException {
-        if (!this.usersById.containsKey(userId)) {
+        boolean userIsCached = this.usersById.containsKey(userId);
+        if (!userIsCached) {
+            try {
+                ResultSet result = this.db.executeQuery("SELECT * FROM `users` where `id`='" + userId+"'");
+                if (result.next()) {
+
+                    int id = result.getInt("id");
+                    String login = result.getString("login");
+                    String password = result.getString("pasword");
+                    String name = result.getString("name");
+
+                    ResultSet resultPlaylist = this.db.executeQuery("SELECT * FROM `usersPlaylists` where `userId`='" + result.getString("id") + "'");
+
+                    ArrayList<Integer> playlistIds = new ArrayList<>();
+                    while (resultPlaylist.next()) {
+                        playlistIds.add(resultPlaylist.getInt("playlistId"));
+                    }
+                    System.out.print(id + "  |  ");
+                    System.out.print(login + "  |  ");
+                    System.out.print(password + "  |  ");
+                    System.out.print(name + "  |  ");
+
+                    for (int playlistId : playlistIds) {
+                        System.out.print(playlistId + "; ");
+                    }
+                    System.out.println();
+                    User user = new User(
+                            id,
+                            login,
+                            password,
+                            name,
+                            playlistIds
+                    );
+                    this.usersByLogin.put(user.getLogin(), user);
+                    this.usersById.put(user.getId(), user);
+                    userIsCached = true;
+
+                } else {
+                    userIsCached = false;
+                }
+
+            } catch (SQLException e) {
+                System.err.println("Error get tracks from db");
+                e.printStackTrace();
+            }
+        }
+        if (!userIsCached) {
             throw new UserNotFoundException("User ID:" + userId + " not found");
         }
         return this.usersById.get(userId);
     }
 
     public User get(String login, String password) throws UserNotFoundException, AuthenticationException {
-        if (!this.usersByLogin.containsKey(login)) {
-            throw new UserNotFoundException("User Login:" + login + " not found");
+        boolean userIsExist = this.isExistUser(login);
+        boolean passwordIsEquals = false;
+
+        if (!userIsExist) {
+            System.out.println("User " + login + " not found in DB");
+            throw new UserNotFoundException("User " + login + " not found");
         }
-        if (!this.usersByLogin.get(login).equalsPassword(password)) {
+        if (!this.usersByLogin.containsKey(login)) {
+            try {
+                ResultSet result = this.db.executeQuery("SELECT * FROM `users` where `login`='" + login + "' and `password`='" + password+"'");
+                if (result.next()) {
+
+                    int id = result.getInt("id");
+                    String name = result.getString("name");
+
+                    ResultSet resultPlaylist = this.db.executeQuery("SELECT * FROM `usersPlaylists` where `userId`='" + result.getString("id") + "'");
+
+                    ArrayList<Integer> playlistIds = new ArrayList<>();
+                    while (resultPlaylist.next()) {
+                        playlistIds.add(resultPlaylist.getInt("playlistId"));
+                    }
+                    System.out.print(id + "  |  ");
+                    System.out.print(login + "  |  ");
+                    System.out.print(password + "  |  ");
+                    System.out.print(name + "  |  ");
+
+                    for (int playlistId : playlistIds) {
+                        System.out.print(playlistId + "; ");
+                    }
+                    System.out.println();
+                    User user = new User(
+                            id,
+                            login,
+                            password,
+                            name,
+                            playlistIds
+                    );
+                    this.usersByLogin.put(user.getLogin(), user);
+                    this.usersById.put(user.getId(), user);
+                    passwordIsEquals = true;
+                    System.out.println("User " + login + " is cached.");
+                }
+            } catch (SQLException e) {
+                System.err.println("Error get tracks from db");
+                e.printStackTrace();
+            }
+        }
+        if (!passwordIsEquals) {
             throw new AuthenticationException("Error password for user " + login);
         }
+
         return this.usersByLogin.get(login);
     }
 
     public boolean isExistUser(String login) throws UserNotFoundException {
-        return this.usersByLogin.containsKey(login);
+        boolean userIsExist = this.usersByLogin.containsKey(login);
+        if (!userIsExist) {
+            System.out.println("User " + login + " not find in cache. Search in DB");
+            try {
+                ResultSet result = this.db.executeQuery("SELECT login FROM `users` WHERE `login`='" + login + "'");
+                userIsExist = result.next();
+                System.out.println("User " + login + " in DB: " + (userIsExist ? "found" : "not found"));
+            } catch (SQLException e) {
+                System.err.println("Error get tracks from db");
+                e.printStackTrace();
+            }
+        }
+        return userIsExist;
     }
 
     public void addPlaylist(int userId, int playlistId) throws UserNotFoundException {
         this.get(userId).getPlaylistIds().add(playlistId);
-        updateDB(userId);
-    }
-
-    public Map<Integer, User> getAll() {
-        return this.usersById;
-    }
-
-    private void updateDB(Integer userId) throws UserNotFoundException {
-        ArrayList<Integer> playlistIds = this.get(userId).getPlaylistIds();
         try {
-            StringBuilder playlistsBuilder = new StringBuilder();
-            for (int i = 0; i < playlistIds.size(); i++) {
-                playlistsBuilder.append(playlistIds.get(i));
-                if (i < playlistIds.size() - 1) playlistsBuilder.append(",");
-            }
             this.db.execute(
-                    "UPDATE `users` " +
-                            "SET " +
-                            "   playlists = '" + playlistsBuilder + "' " +
-                            "WHERE " +
-                            "   id = " + userId
+                    "INSERT INTO  `usersPlaylists` " +
+                            "    (playlistId, userId) " +
+                            "VALUES " +
+                            "    ('" + playlistId + "', '" + userId + "');"
             );
+            System.out.println("Add playlist " + playlistId + " for user " + this.get(userId).getLogin());
         } catch (SQLException e) {
             System.err.println("Error write do db");
             e.printStackTrace();
         }
+    }
+
+    public Map<Integer, User> getAll() {
+        return this.usersById;
     }
 }
