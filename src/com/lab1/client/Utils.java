@@ -24,10 +24,10 @@ public class Utils {
         this.track = client.track;
     }
 
-    public Playlist createPlaylistFromFile(User user, String path, String name) throws FileNotFoundException, RemoteException, PlaylistNotFoundException, UserNotFoundException {
+    public Playlist createPlaylistFromFile(User user, String path, String name) throws FileNotFoundException, RemoteException, PlaylistNotFoundException, UserNotFoundException, TrackNotFoundException {
         double size;
         int duration;
-        String artist = "";
+        String author = "";
         String trackName;
         Playlist playlist = this.playlist.create(user.getId(), name);
 
@@ -38,16 +38,16 @@ public class Utils {
         scan.useLocale(Locale.ENGLISH);
         while (scan.hasNextLine()) {
             do {
-                artist = scan.nextLine();
-            } while (scan.hasNextLine() && artist.equals(""));
+                author = scan.nextLine();
+            } while (scan.hasNextLine() && author.equals(""));
             if (!scan.hasNextLine()) break;
             trackName = scan.nextLine();
             duration = scan.nextInt();
             size = scan.nextDouble();
             //Track
-            Track track = this.track.create(artist, trackName, size, duration);
+            Track track = this.track.create(author, trackName, size, duration);
             this.playlist.addTrack(user.getId(), playlist.getId(), track);
-            System.out.println("Add track [artist: '" + artist + "' name: '" + trackName + "' size: " + size + "mb duration: " + duration + "sec]");
+            System.out.println("Add track [author: '" + author + "' name: '" + trackName + "' size: " + size + "mb duration: " + duration + "sec]");
         }
         scan.close();
         System.out.println("All tracks added!");
@@ -61,7 +61,7 @@ public class Utils {
             ArrayList<Integer> tracks = this.playlist.get(user.getId(), playlistId).getTrackIds();
             for (int id : tracks) {
                 Track track = this.track.get(id);
-                writer.write(track.getArtist() + "\n");
+                writer.write(track.getauthor() + "\n");
                 writer.write(track.getName() + "\n");
                 writer.write(track.getDuration() + "\n");
                 writer.write(track.getSize() + "\n");

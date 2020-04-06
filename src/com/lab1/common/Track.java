@@ -10,24 +10,24 @@ public class Track implements Serializable, TrackRMI {
     private int id;
     private double size;
     private int duration;
-    private String artist;
+    private String author;
 
     /**
      * @param name     - название трека
      * @param size     - размер трека (МБ)
      * @param duration - длительность трека (сек)
      * @param id       - уникальный id трека
-     * @param artist   - автор трека
+     * @param author   - автор трека
      */
-    public Track(String artist, String name, double size, int duration, int id ) throws IllegalArgumentException {
+    public Track(String author, String name, double size, int duration, int id ) throws IllegalArgumentException {
         if(name.trim().equals("")) {
             throw new IllegalArgumentException("The name must not be empty");
         }
         this.name = name.trim();
-        if(artist.trim().equals("")) {
-            throw new IllegalArgumentException("The artist must not be empty");
+        if(author.trim().equals("")) {
+            throw new IllegalArgumentException("The author must not be empty");
         }
-        this.artist = artist.trim();
+        this.author = author.trim();
         if(size <= 0) {
             throw new IllegalArgumentException("Size must be positive and greater than zero");
         }
@@ -46,8 +46,8 @@ public class Track implements Serializable, TrackRMI {
         return this.id;
     }
 
-    public String getArtist() {
-        return this.artist;
+    public String getauthor() {
+        return this.author;
     }
 
     public String getName() {
@@ -63,11 +63,11 @@ public class Track implements Serializable, TrackRMI {
     }
 
     public boolean equals(Track track) {
-        return isEqual(track.artist, track.name, track.duration, track.size);
+        return isEqual(track.author, track.name, track.duration, track.size);
     }
 
-    public boolean isEqual(String artist, String name, int duration, double size) {
-        return this.artist.equals(artist)
+    public boolean isEqual(String author, String name, int duration, double size) {
+        return this.author.equals(author)
             && this.name.equals(name)
             && this.duration == duration
             && this.size == size;

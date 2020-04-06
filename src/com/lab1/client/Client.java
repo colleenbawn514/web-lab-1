@@ -83,9 +83,9 @@ public class Client extends ClientConnection {
                     case "create t"://создать трек
                         System.out.print("Playlist ID: ");
                         Playlist playlist = client.playlist.get(user.getId(), console.nextInt());
-                        System.out.print("Track artist: ");
+                        System.out.print("Track author: ");
                         console.nextLine();
-                        String artist = console.nextLine();
+                        String author = console.nextLine();
                         System.out.print("Track name: ");
                         name = console.nextLine();
                         System.out.print("Track size: ");
@@ -94,7 +94,7 @@ public class Client extends ClientConnection {
                         console.nextLine();
                         int duration = console.nextInt();
                         console.nextLine();
-                        Track track = client.track.create(artist, name, size, duration);
+                        Track track = client.track.create(author, name, size, duration);
                         client.playlist.addTrack(user.getId(), playlist.getId(), track);
                         break;
                     case "get p --all"://вывести все плейлисты
@@ -125,13 +125,13 @@ public class Client extends ClientConnection {
 
                         ArrayList<Integer> tracks = client.playlist.get(user.getId(), playlistId).getTrackIds();
                         System.out.println(tracks.size());
-                        System.out.println("ID  | Artist                | Name                  | Duration(Sec)     | Size(MB)");
+                        System.out.println("ID  | author                | Name                  | Duration(Sec)     | Size(MB)");
                         for (int id : tracks) {
                             track = client.track.get(id);
                             System.out.println(String.format(
                                     "%-4s| %-21s | %-21s | %-17s | %s",
                                     id,
-                                    track.getArtist(),
+                                    track.getauthor(),
                                     track.getName(),
                                     track.getDuration(),
                                     track.getSize()
@@ -149,13 +149,13 @@ public class Client extends ClientConnection {
 
                         System.out.println("Playlist sorted by " + (isAsc ? "ASC" : "DESC"));
                         break;
-                    case "edit p --duplicate-remove":
+                   /* case "edit p --duplicate-remove":
                         System.out.print("Playlist ID: ");
                         playlistId = console.nextInt();
                         console.nextLine();
 
                         client.playlist.removeDuplicate(user.getId(), playlistId);
-                        break;
+                        break;*/
                     case "run task":
                         try {
                             System.out.print("Path: ");
@@ -164,7 +164,7 @@ public class Client extends ClientConnection {
                             name = console.nextLine();
                             playlist = client.utils.createPlaylistFromFile(user, path, name);
 
-                            client.playlist.removeDuplicate(user.getId(), playlist.getId());
+                            //client.playlist.removeDuplicate(user.getId(), playlist.getId());
 
                             System.out.print("Sort by Asc [y|n]?: ");
                             isAsc = console.nextLine().equals("y");
@@ -188,7 +188,7 @@ public class Client extends ClientConnection {
                         System.out.print("get p --all                   Вывести все плейлисты \n");
                         System.out.print("get p --file                  Вывести плейлист в файл \n");
                         System.out.print("edit p --sort                 Сортировка плейлиста \n");
-                        System.out.print("edit p --duplicate-remove     Удаление дупликатов \n");
+                        //System.out.print("edit p --duplicate-remove     Удаление дупликатов \n");
                         System.out.print("run task                      Выполнение задания лабораторной \n");
                         System.out.print("exit                          Выход \n");
                         break;

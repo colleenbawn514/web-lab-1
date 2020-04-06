@@ -18,7 +18,6 @@ import java.util.Map;
 public class UserLibrary implements UserManagerRemote {
     private Map<Integer, User> usersById = new HashMap<>();
     private Map<String, User> usersByLogin = new HashMap<>();
-    private int maxId = 1;
     private final DB db;
 
     public UserLibrary(DB db) {
@@ -46,9 +45,8 @@ public class UserLibrary implements UserManagerRemote {
     }
 
     public User create(String login, String password, String name) throws IllegalArgumentException {
-        User user = new User(this.maxId, login, password, name);
-        this.usersById.put(this.maxId, user);
-        this.usersByLogin.put(user.getLogin(), user);
+        int userId;
+        User user = null;
         try {
             this.db.execute(
                     "INSERT INTO `users` " +
@@ -56,12 +54,19 @@ public class UserLibrary implements UserManagerRemote {
                             "VALUES " +
                             "    ('" + login + "', '" + password + "', '" + name + "');"
             );
-            System.out.println("User create login: "+ login);
+            ResultSet result = this.db.executeQuery("SELECT MAX(id) FROM `users`");
+            if(result.next()){
+                userId = result.getInt(1);
+            } else {
+                userId = 1;
+            }
+            user = new User(userId, login, password, name);
+            this.usersById.put(userId, user);
+            this.usersByLogin.put(user.getLogin(), user);
         } catch (SQLException e) {
             System.err.println("Error write do db");
             e.printStackTrace();
         }
-        this.maxId += 1;
 
         return user;
     }
@@ -87,7 +92,7 @@ public class UserLibrary implements UserManagerRemote {
                     System.out.print(id + "  |  ");
                     System.out.print(login + "  |  ");
                     System.out.print(password + "  |  ");
-                    System.out.print(name + "  |  ");
+                    System.out.println(name + "  |  ");
 
                     for (int playlistId : playlistIds) {
                         System.out.print(playlistId + "; ");

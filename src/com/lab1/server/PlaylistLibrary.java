@@ -1,5 +1,6 @@
 package com.lab1.server;
 
+import com.lab1.common.User;
 import com.lab1.exception.PlaylistNotFoundException;
 import com.lab1.exception.TrackNotFoundException;
 import com.lab1.exception.UserNotFoundException;
@@ -16,7 +17,6 @@ import java.util.Map;
 
 public class PlaylistLibrary implements PlaylistManagerRemote {
     private Map<Integer, Playlist> playlists = new HashMap<>();
-    int maxId = 1;
     private final MusicLibrary tracks;
     private final UserLibrary users;
     private final DB db;
@@ -29,41 +29,16 @@ public class PlaylistLibrary implements PlaylistManagerRemote {
             this.db.execute(
                     "CREATE TABLE IF NOT EXISTS `playlists` ( " +
                             "   id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                            "   name VARCHAR(20), " +
-                            "   tracks TEXT " +
+                            "   name VARCHAR(20) " +
                             " )"
             );
-
-            ResultSet result = this.db.executeQuery("SELECT * FROM `playlists`");
-            int size = 0;
-
-            System.out.println("load playlists");
-            while (result.next()) {
-                int count = result.getMetaData().getColumnCount();
-                for (int i = 1; i < count + 1; i++) {
-                    System.out.print(result.getString(i) + "  |  ");
-                }
-                System.out.println();
-
-                ArrayList<Integer> trackIds = new ArrayList<>();
-                if (result.getString(3).length() != 0) {
-                    for (String id : result.getString(3).split(",")) {
-                        trackIds.add(Integer.parseInt(id));
-                    }
-                }
-                Playlist playlist = new Playlist(
-                        result.getString(2),
-                        Integer.parseInt(result.getString(1)),
-                        trackIds
-                );
-                size += 1;
-                this.playlists.put(Integer.parseInt(result.getString(1)), playlist);
-            }
-            result = this.db.executeQuery("SELECT MAX(id) FROM `playlists`");
-            if (result.getString(1) != null) {
-                this.maxId = Integer.parseInt(result.getString(1)) + 1;
-            }
-            System.out.println("Load " + size + " playlists to cache");
+            this.db.execute(
+                    "CREATE TABLE IF NOT EXISTS `playlistTracks` ( " +
+                            "   id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                            "   trackId INTEGER, " +
+                            "   playlistId INTEGER " +
+                            " )"
+            );
         } catch (SQLException e) {
             System.err.println("Error get tracks from db");
             e.printStackTrace();
@@ -71,76 +46,157 @@ public class PlaylistLibrary implements PlaylistManagerRemote {
     }
 
     public Playlist create(int userId, String name) throws UserNotFoundException {
-        Playlist playlist = new Playlist(name, this.maxId);
-        this.users.addPlaylist(userId, this.maxId);
-        this.playlists.put(this.maxId, playlist);
+        int playlistId;
+        Playlist playlist = null;
         try {
             this.db.execute(
                     "INSERT INTO `playlists` " +
-                            "    (name, tracks) " +
+                            "(name) " +
                             "VALUES " +
-                            "    ('" + name + "', '');"
+                            "    ('" + name + "')"
             );
+            ResultSet result = this.db.executeQuery("SELECT MAX(id) FROM `playlists`");
+            if (result.next()) {
+                playlistId = result.getInt(1);
+            } else {
+                playlistId = 1;
+            }
+            playlist = new Playlist(name, playlistId);
+            this.users.addPlaylist(userId, playlistId);
+            this.playlists.put(playlistId, playlist);
+
         } catch (SQLException e) {
             System.err.println("Error write do db");
             e.printStackTrace();
         }
-        this.maxId += 1;
 
         return playlist;
     }
 
     public Playlist get(int userId, int playlistId) throws PlaylistNotFoundException, UserNotFoundException {
-        if (!this.playlists.containsKey(playlistId)) {
+        boolean playlistIsExist = this.isExistUserPlaylist(userId, playlistId);
+
+        if (!playlistIsExist) {
+            System.out.println("Playlist " + playlistId + " not found in DB");
             throw new PlaylistNotFoundException("Playlist " + playlistId + " not found");
         }
-        if (!this.users.get(userId).getPlaylistIds().contains(playlistId)) {
-            throw new PlaylistNotFoundException("Playlist " + playlistId + " not found in user " + userId);
+
+        boolean playlistIsCached = this.playlists.containsKey(playlistId);
+        if (!playlistIsCached) {
+            try {
+                ResultSet result = this.db.executeQuery("SELECT * FROM `playlists` WHERE `id`='" + playlistId + "'");
+                if (result.next()) {
+                    int id = result.getInt("id");
+                    String name = result.getString("name");
+
+                    ResultSet resultPlaylist = this.db.executeQuery("SELECT `trackId` FROM `playlistTracks` where" +
+                            " `playlistId`='" + playlistId + "'");
+
+                    ArrayList<Integer> trackIds = new ArrayList<>();
+                    while (resultPlaylist.next()) {
+                        trackIds.add(resultPlaylist.getInt("trackId"));
+                    }
+
+                    Playlist playlist = new Playlist(
+                            name,
+                            id,
+                            trackIds
+                    );
+                    this.playlists.put(playlistId, playlist);
+                    playlistIsCached = true;
+
+                } else {
+                    playlistIsCached = false;
+                }
+
+            } catch (SQLException e) {
+                System.err.println("Error get playlist from db");
+                e.printStackTrace();
+            }
         }
+        if (!playlistIsCached) {
+            throw new PlaylistNotFoundException("Playlist ID:" + playlistId + " not found");
+        }
+
         return this.playlists.get(playlistId);
     }
 
     public Map<Integer, String> getAll(int userId) throws UserNotFoundException {
         Map<Integer, String> playlists = new HashMap<>();
 
-        for (int id : this.users.get(userId).getPlaylistIds()) {
-            System.out.println(id);
-            playlists.put(id, this.playlists.get(id).getName());
+        try {
+            ResultSet result = this.db.executeQuery("SELECT * FROM `playlists` WHERE `id` IN " +
+                    "(SELECT `playlistId` FROM `usersPlaylists` WHERE `userId`='" + userId + "')");
+            while (result.next()) {
+                playlists.put(result.getInt("id"), result.getString("name"));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error get tracks from db");
+            e.printStackTrace();
         }
 
         return playlists;
     }
 
     public void addTrack(int userId, int playlistId, Track track) throws PlaylistNotFoundException, UserNotFoundException {
-        this.get(userId, playlistId).getTrackIds().add(track.getId());
-        updateDB(userId, playlistId);
+
+        System.out.println("Check exist in cache " + this.get(userId, playlistId).getTrackIds().contains(track.getId()));
+        if (!this.get(userId, playlistId).getTrackIds().contains(track.getId())) {
+            this.get(userId, playlistId).getTrackIds().add(track.getId());
+            try {
+                this.db.execute(
+                        "INSERT INTO  `playlistTracks` " +
+                                "    ( trackId, playlistId) " +
+                                "VALUES " +
+                                "    ('" + track.getId() + "', '" + playlistId + "');"
+                );
+                System.out.println("Add track " + track.getId() + " for playlist " + playlistId + " for user " + userId);
+            } catch (SQLException e) {
+                System.err.println("Error write do db");
+                e.printStackTrace();
+            }
+        }
     }
 
     public void sort(int userId, int playlistId, boolean isAsc) throws PlaylistNotFoundException, UserNotFoundException {
-        Playlist playlist = this.get(userId, playlistId);
-        Comparator<Integer> comparator = Comparator.comparing(id -> {
-            try {
-                return tracks.get(id).getArtist() + tracks.get(id).getName();
-            } catch (TrackNotFoundException e) {
-                e.printStackTrace();
+         System.out.println(isAsc);
+         Playlist playlist = this.get(userId, playlistId);
+        try {
+            ResultSet result = this.db.executeQuery(
+                    "SELECT `tracks`.`id` FROM `playlistTracks`, `tracks`, `authors`" +
+                            "WHERE `playlistTracks`.`playlistId`='" + playlistId + "'"   +
+                            "AND `playlistTracks`.`trackId`=`tracks`.`id`"+
+                            " AND `tracks`.`author`=`authors`.`id` " +
+                            "ORDER BY  `authors`.`name` "+ (isAsc ? "ASC" : "DESC") +", `tracks`.`name` " + (isAsc ? "ASC" : "DESC")
+            );
+
+            System.out.println("Sort tracks in playlist " + playlistId + " for user " + userId);
+            playlist.getTrackIds().clear();
+            while (result.next()) {
+                playlist.getTrackIds().add(result.getInt("id"));
             }
-            return null;
-        });
-
-        if (isAsc) {
-            playlist.getTrackIds().sort(comparator);
-        } else {
-            playlist.getTrackIds().sort(comparator.reversed());
+        } catch (SQLException e) {
+            System.err.println("Error write do db");
+            e.printStackTrace();
         }
-        updateDB(userId, playlistId);
+
     }
 
-    public void removeTrack(int userId, int playlistId, int index) throws PlaylistNotFoundException, UserNotFoundException {
-        this.get(userId, playlistId).getTrackIds().remove(index);
-        updateDB(userId, playlistId);
+    public void removeTrack(int userId, int playlistId, Track track) throws PlaylistNotFoundException, UserNotFoundException {
+        this.get(userId, playlistId).getTrackIds().remove(track.getId());
+        try {
+            this.db.execute(
+                    "DELETE FROM `playlistTracks` " +
+                            "    WHERE `trackId`='" + track.getId() + "' AND `playlistId`=' " + playlistId + "'"
+            );
+            System.out.println("Delete track " + track.getId() + " in playlist " + playlistId + " for user " + userId);
+        } catch (SQLException e) {
+            System.err.println("Error write do db");
+            e.printStackTrace();
+        }
     }
 
-    public void removeDuplicate(int userId, int playlistId) throws PlaylistNotFoundException, TrackNotFoundException, UserNotFoundException {
+   /* public void removeDuplicate(int userId, int playlistId) throws PlaylistNotFoundException, TrackNotFoundException, UserNotFoundException {
         ArrayList<Integer> tracks = this.get(userId, playlistId).getTrackIds();
         for (int i = 0; i < this.get(userId, playlistId).getSize(); i++) {
             for (int j = i + 1; j < this.get(userId, playlistId).getSize(); j++) {
@@ -152,26 +208,41 @@ public class PlaylistLibrary implements PlaylistManagerRemote {
             }
         }
         updateDB(userId, playlistId);
+    }*/
+
+    public boolean isExistPlaylist(int playlistId) throws PlaylistNotFoundException {
+        boolean playlistIsExist = this.playlists.containsKey(playlistId);
+        if (!playlistIsExist) {
+            System.out.println("Playlist " + playlistId + " not find in cache. Search in DB");
+            try {
+                ResultSet result = this.db.executeQuery("SELECT id FROM `playlists` WHERE `id`='" + playlistId + "'");
+                playlistIsExist = result.next();
+                System.out.println("Playlist " + playlistId + " in DB: " + (playlistIsExist ? "found" : "not found"));
+            } catch (SQLException e) {
+                System.err.println("Error get tracks from db");
+                e.printStackTrace();
+            }
+        }
+        return playlistIsExist;
     }
 
-    private void updateDB(Integer userId, Integer playlistId) throws UserNotFoundException, PlaylistNotFoundException {
-        ArrayList<Integer> tracks = this.get(userId, playlistId).getTrackIds();
-        try {
-            StringBuilder tracksBuilder = new StringBuilder();
-            for (int i = 0; i < tracks.size(); i++) {
-                tracksBuilder.append(tracks.get(i));
-                if (i < tracks.size() - 1) tracksBuilder.append(",");
+    public boolean isExistUserPlaylist(int userId, int playlistId) throws PlaylistNotFoundException, UserNotFoundException {
+        boolean playlistIsExist = this.playlists.containsKey(playlistId);
+        if (!playlistIsExist) {
+            System.out.println("Playlist " + playlistId + " not find in cache. Search in DB");
+            try {
+                ResultSet result = this.db.executeQuery("SELECT id FROM `usersPlaylists` WHERE " +
+                        "`userId`='" + userId + "' AND `playlistId`='" + playlistId + "'");
+                playlistIsExist = result.next();
+                System.out.println("Playlist " + playlistId + " in DB: " + (playlistIsExist ? "found" : "not found"));
+            } catch (SQLException e) {
+                System.err.println("Error get tracks from db");
+                e.printStackTrace();
             }
-            this.db.execute(
-                    "UPDATE `playlists` " +
-                            "SET " +
-                            "   tracks = '" + tracksBuilder + "' " +
-                            "WHERE " +
-                            "   id = " + playlistId
-            );
-        } catch (SQLException e) {
-            System.err.println("Error write do db");
-            e.printStackTrace();
+        } else {
+            playlistIsExist = this.users.get(userId).getPlaylistIds().contains(playlistId);
         }
+        return playlistIsExist;
     }
+
 }

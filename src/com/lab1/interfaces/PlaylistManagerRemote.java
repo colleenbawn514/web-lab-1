@@ -17,5 +17,5 @@ public interface PlaylistManagerRemote extends Remote {
 
     void sort(int userId, int playlistId, boolean isAsc) throws RemoteException, PlaylistNotFoundException, UserNotFoundException;
 
-    void removeDuplicate(int userId, int playlistId) throws RemoteException, PlaylistNotFoundException, TrackNotFoundException, UserNotFoundException;
+   // void removeDuplicate(int userId, int playlistId) throws RemoteException, PlaylistNotFoundException, TrackNotFoundException, UserNotFoundException;
 }

@@ -6,7 +6,7 @@ import java.rmi.RemoteException;
 public interface TrackRMI extends Remote {
     int getId() throws RemoteException;
 
-    String getArtist() throws RemoteException;
+    String getauthor() throws RemoteException;
 
     String getName() throws RemoteException;
 
@@ -14,5 +14,5 @@ public interface TrackRMI extends Remote {
 
     double getSize() throws RemoteException;
 
-    boolean isEqual(String artist, String name, int duration, double size) throws RemoteException;
+    boolean isEqual(String author, String name, int duration, double size) throws RemoteException;
 }
