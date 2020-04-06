@@ -171,6 +171,8 @@ public class UserLibrary implements UserManagerRemote {
                 System.err.println("Error get tracks from db");
                 e.printStackTrace();
             }
+        }else {
+            passwordIsEquals = this.usersByLogin.get(login).equalsPassword(password);
         }
         if (!passwordIsEquals) {
             throw new AuthenticationException("Error password for user " + login);
