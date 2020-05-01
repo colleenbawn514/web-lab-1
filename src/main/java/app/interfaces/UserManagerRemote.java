@@ -17,4 +17,6 @@ public interface UserManagerRemote extends Remote {
     boolean isExistUser(String login) throws RemoteException, UserNotFoundException;
 
     Map<Integer, User> getAll() throws RemoteException, PlaylistNotFoundException;
+
+
 }

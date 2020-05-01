@@ -4,9 +4,9 @@ import com.lab1.interfaces.PlaylistRMI;
 import java.io.*;
 import java.util.ArrayList;
 
-public class Playlist implements Serializable, PlaylistRMI {
+public class Playlist<T> implements Serializable, PlaylistRMI {
     private static final long serialVersionUID = 1;
-    private ArrayList<Integer> trackIds = new ArrayList<>();//номер трека
+    private ArrayList<T> trackIds = new ArrayList<>();//номер трека
     private String name;
     private int id;
 
@@ -21,7 +21,7 @@ public class Playlist implements Serializable, PlaylistRMI {
         this.name = name.trim();
     }
 
-    public Playlist(String name, int id, ArrayList<Integer> trackIds) {
+    public Playlist(String name, int id, ArrayList<T> trackIds) {
         if(id < 0) {
             throw new IllegalArgumentException("Id must be positive and greater than zero");
         }
@@ -45,7 +45,12 @@ public class Playlist implements Serializable, PlaylistRMI {
         return this.trackIds.size();
     }
 
-    public ArrayList<Integer> getTrackIds() {
+    public ArrayList<T> getTrackIds() {
         return this.trackIds;
+    }
+
+    public  Playlist<Track> getFullPlaylist(){
+        ArrayList
+        return new Playlist<Track>(this.name, this.id, )
     }
 }
