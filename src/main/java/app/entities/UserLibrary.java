@@ -1,29 +1,32 @@
-package com.lab1.server;
-
-import com.lab1.common.Playlist;
-import com.lab1.common.Track;
-import com.lab1.common.User;
-import com.lab1.exception.PlaylistNotFoundException;
-import com.lab1.exception.UserNotFoundException;
-import com.lab1.interfaces.UserManagerRemote;
+package app.entities;
+import app.entities.DB;
+import app.common.User;
+import app.exception.UserNotFoundException;
 
 import javax.naming.AuthenticationException;
-import java.rmi.RemoteException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class UserLibrary implements UserManagerRemote {
-    private Map<Integer, User> usersById = new HashMap<>();
-    private Map<String, User> usersByLogin = new HashMap<>();
-    private final DB db;
+public class UserLibrary {
+    private static Map<Integer, User> usersById = new HashMap<>();
+    private static Map<String, User> usersByLogin = new HashMap<>();
+    private static DB db;
 
-    public UserLibrary(DB db) {
-        this.db = db;
+    static {
         try {
-            this.db.execute(
+            db = UserLibrary.connectToDB();
+        } catch (SQLException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static DB connectToDB() throws SQLException, ClassNotFoundException {
+        DB db = DB.connection("colleen.music");
+        try {
+            db.execute(
                     "CREATE TABLE IF NOT EXISTS `users` ( " +
                             "   id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                             "   login VARCHAR(20), " +
@@ -31,7 +34,7 @@ public class UserLibrary implements UserManagerRemote {
                             "   name VARCHAR(20) " +
                             " )"
             );
-            this.db.execute(
+            db.execute(
                     "CREATE TABLE IF NOT EXISTS `usersPlaylists` ( " +
                             "   id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                             "   playlistId INTEGER, " +
@@ -42,27 +45,28 @@ public class UserLibrary implements UserManagerRemote {
             System.err.println("Error get tracks from db");
             e.printStackTrace();
         }
+        return db;
     }
 
-    public User create(String login, String password, String name) throws IllegalArgumentException {
+    public static User create(String login, String password, String name) throws IllegalArgumentException {
         int userId;
         User user = null;
         try {
-            this.db.execute(
+            UserLibrary.db.execute(
                     "INSERT INTO `users` " +
                             "    (login, password, name) " +
                             "VALUES " +
                             "    ('" + login + "', '" + password + "', '" + name + "');"
             );
-            ResultSet result = this.db.executeQuery("SELECT MAX(id) FROM `users`");
+            ResultSet result = UserLibrary.db.executeQuery("SELECT MAX(id) FROM `users`");
             if(result.next()){
                 userId = result.getInt(1);
             } else {
                 userId = 1;
             }
             user = new User(userId, login, password, name);
-            this.usersById.put(userId, user);
-            this.usersByLogin.put(user.getLogin(), user);
+            UserLibrary.usersById.put(userId, user);
+            UserLibrary.usersByLogin.put(user.getLogin(), user);
         } catch (SQLException e) {
             System.err.println("Error write do db");
             e.printStackTrace();
@@ -71,11 +75,11 @@ public class UserLibrary implements UserManagerRemote {
         return user;
     }
 
-    public User get(int userId) throws UserNotFoundException {
-        boolean userIsCached = this.usersById.containsKey(userId);
+    public static User get(int userId) throws UserNotFoundException {
+        boolean userIsCached = UserLibrary.usersById.containsKey(userId);
         if (!userIsCached) {
             try {
-                ResultSet result = this.db.executeQuery("SELECT * FROM `users` where `id`='" + userId+"'");
+                ResultSet result = UserLibrary.db.executeQuery("SELECT * FROM `users` where `id`='" + userId+"'");
                 if (result.next()) {
 
                     int id = result.getInt("id");
@@ -83,7 +87,7 @@ public class UserLibrary implements UserManagerRemote {
                     String password = result.getString("pasword");
                     String name = result.getString("name");
 
-                    ResultSet resultPlaylist = this.db.executeQuery("SELECT * FROM `usersPlaylists` where `userId`='" + result.getString("id") + "'");
+                    ResultSet resultPlaylist = UserLibrary.db.executeQuery("SELECT * FROM `usersPlaylists` where `userId`='" + result.getString("id") + "'");
 
                     ArrayList<Integer> playlistIds = new ArrayList<>();
                     while (resultPlaylist.next()) {
@@ -105,8 +109,8 @@ public class UserLibrary implements UserManagerRemote {
                             name,
                             playlistIds
                     );
-                    this.usersByLogin.put(user.getLogin(), user);
-                    this.usersById.put(user.getId(), user);
+                    UserLibrary.usersByLogin.put(user.getLogin(), user);
+                    UserLibrary.usersById.put(user.getId(), user);
                     userIsCached = true;
 
                 } else {
@@ -121,26 +125,26 @@ public class UserLibrary implements UserManagerRemote {
         if (!userIsCached) {
             throw new UserNotFoundException("User ID:" + userId + " not found");
         }
-        return this.usersById.get(userId);
+        return UserLibrary.usersById.get(userId);
     }
 
-    public User get(String login, String password) throws UserNotFoundException, AuthenticationException {
-        boolean userIsExist = this.isExistUser(login);
+    public static User get(String login, String password) throws UserNotFoundException, AuthenticationException {
+        boolean userIsExist = UserLibrary.isExistUser(login);
         boolean passwordIsEquals = false;
 
         if (!userIsExist) {
             System.out.println("User " + login + " not found in DB");
             throw new UserNotFoundException("User " + login + " not found");
         }
-        if (!this.usersByLogin.containsKey(login)) {
+        if (!UserLibrary.usersByLogin.containsKey(login)) {
             try {
-                ResultSet result = this.db.executeQuery("SELECT * FROM `users` where `login`='" + login + "' and `password`='" + password+"'");
+                ResultSet result = UserLibrary.db.executeQuery("SELECT * FROM `users` where `login`='" + login + "' and `password`='" + password+"'");
                 if (result.next()) {
 
                     int id = result.getInt("id");
                     String name = result.getString("name");
 
-                    ResultSet resultPlaylist = this.db.executeQuery("SELECT * FROM `usersPlaylists` where `userId`='" + result.getString("id") + "'");
+                    ResultSet resultPlaylist = UserLibrary.db.executeQuery("SELECT * FROM `usersPlaylists` where `userId`='" + result.getString("id") + "'");
 
                     ArrayList<Integer> playlistIds = new ArrayList<>();
                     while (resultPlaylist.next()) {
@@ -162,8 +166,8 @@ public class UserLibrary implements UserManagerRemote {
                             name,
                             playlistIds
                     );
-                    this.usersByLogin.put(user.getLogin(), user);
-                    this.usersById.put(user.getId(), user);
+                    UserLibrary.usersByLogin.put(user.getLogin(), user);
+                    UserLibrary.usersById.put(user.getId(), user);
                     passwordIsEquals = true;
                     System.out.println("User " + login + " is cached.");
                 }
@@ -172,21 +176,21 @@ public class UserLibrary implements UserManagerRemote {
                 e.printStackTrace();
             }
         }else {
-            passwordIsEquals = this.usersByLogin.get(login).equalsPassword(password);
+            passwordIsEquals = UserLibrary.usersByLogin.get(login).equalsPassword(password);
         }
         if (!passwordIsEquals) {
             throw new AuthenticationException("Error password for user " + login);
         }
 
-        return this.usersByLogin.get(login);
+        return UserLibrary.usersByLogin.get(login);
     }
 
-    public boolean isExistUser(String login) throws UserNotFoundException {
-        boolean userIsExist = this.usersByLogin.containsKey(login);
+    public static boolean isExistUser(String login) {
+        boolean userIsExist = UserLibrary.usersByLogin.containsKey(login);
         if (!userIsExist) {
             System.out.println("User " + login + " not find in cache. Search in DB");
             try {
-                ResultSet result = this.db.executeQuery("SELECT login FROM `users` WHERE `login`='" + login + "'");
+                ResultSet result = UserLibrary.db.executeQuery("SELECT login FROM `users` WHERE `login`='" + login + "'");
                 userIsExist = result.next();
                 System.out.println("User " + login + " in DB: " + (userIsExist ? "found" : "not found"));
             } catch (SQLException e) {
@@ -198,15 +202,15 @@ public class UserLibrary implements UserManagerRemote {
     }
 
     public void addPlaylist(int userId, int playlistId) throws UserNotFoundException {
-        this.get(userId).getPlaylistIds().add(playlistId);
+        UserLibrary.get(userId).getPlaylistIds().add(playlistId);
         try {
-            this.db.execute(
+            UserLibrary.db.execute(
                     "INSERT INTO  `usersPlaylists` " +
                             "    (playlistId, userId) " +
                             "VALUES " +
                             "    ('" + playlistId + "', '" + userId + "');"
             );
-            System.out.println("Add playlist " + playlistId + " for user " + this.get(userId).getLogin());
+            System.out.println("Add playlist " + playlistId + " for user " + UserLibrary.get(userId).getLogin());
         } catch (SQLException e) {
             System.err.println("Error write do db");
             e.printStackTrace();
@@ -214,6 +218,6 @@ public class UserLibrary implements UserManagerRemote {
     }
 
     public Map<Integer, User> getAll() {
-        return this.usersById;
+        return UserLibrary.usersById;
     }
 }

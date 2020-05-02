@@ -1,14 +1,12 @@
-package com.lab1.server;
+package app.entities;
 
-import com.lab1.common.*;
-import com.lab1.exception.PlaylistNotFoundException;
-import com.lab1.exception.TrackNotFoundException;
-import com.lab1.exception.UserNotFoundException;
-import com.lab1.interfaces.TrackManagerRemote;
+import app.common.*;
+import app.entities.DB;
+import app.exception.TrackNotFoundException;
+import app.interfaces.TrackManagerRemote;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 

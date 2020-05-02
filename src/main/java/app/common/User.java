@@ -1,6 +1,6 @@
-package com.lab1.common;
+package app.common;
 
-import com.lab1.interfaces.UserRMI;
+import app.interfaces.UserRMI;
 
 import java.io.Serializable;
 import java.util.ArrayList;

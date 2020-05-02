@@ -1,13 +1,13 @@
-package com.lab1.client;
+package app.client;
 
-import com.lab1.common.Playlist;
-import com.lab1.common.Track;
-import com.lab1.common.User;
-import com.lab1.exception.PlaylistNotFoundException;
-import com.lab1.exception.TrackNotFoundException;
-import com.lab1.exception.UserNotFoundException;
-import com.lab1.interfaces.PlaylistManagerRemote;
-import com.lab1.interfaces.TrackManagerRemote;
+import app.common.Playlist;
+import app.common.Track;
+import app.common.User;
+import app.exception.PlaylistNotFoundException;
+import app.exception.TrackNotFoundException;
+import app.exception.UserNotFoundException;
+import app.interfaces.PlaylistManagerRemote;
+import app.interfaces.TrackManagerRemote;
 
 import java.io.*;
 import java.rmi.RemoteException;

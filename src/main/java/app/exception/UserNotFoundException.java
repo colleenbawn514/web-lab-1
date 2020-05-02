@@ -1,4 +1,4 @@
-package com.lab1.exception;
+package app.exception;
 
 public class UserNotFoundException extends Exception {
     public UserNotFoundException(String message) {

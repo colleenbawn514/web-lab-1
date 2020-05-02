@@ -1,5 +1,5 @@
-package com.lab1.common;
-import com.lab1.interfaces.TrackRMI;
+package app.common;
+import app.interfaces.TrackRMI;
 
 import java.io.*;
 import java.rmi.RemoteException;

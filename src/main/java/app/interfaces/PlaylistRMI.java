@@ -1,6 +1,6 @@
-package com.lab1.interfaces;
-import com.lab1.common.Track;
-import com.lab1.exception.PlaylistNotFoundException;
+package app.interfaces;
+import app.common.Track;
+import app.exception.PlaylistNotFoundException;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;

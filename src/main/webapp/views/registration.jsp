@@ -8,16 +8,19 @@
 	</head>
 	<body>
 		<div>
-            <h2>Вход в систему</h2>
+		    <a href="/auth">Вернуться назад</a>
+		    <h2>Регистрация</h2>
             <form action="" method="POST">
-                <% if (new Boolean(true).equals(request.getAttribute("errorLogin")) ) { %>
-                     <p style="color: red;">Пользователь не найден<p>
-                <% } %>
-                <label for="login">Логин*</label>
+                <label for="login">Логин</label>
                 <input type="text" name="login" id="label" value="${login}">
                 <br/>
-                <button name="action" type="submit" value="login">Войти</button>
-                <button name="action" type="submit" value="registration">Зарегистрироваться</button>
+                <label for="password">Пароль</label>
+                <input type="password" name="password" id="password">
+                <br/>
+                <label for="name">Имя</label>
+                <input type="name" name="name" id="name">
+                <br/>
+                <input type="submit" value="Зарегистрироваться">
             </form>
 		</div>
 	</body>

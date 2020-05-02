@@ -1,7 +1,7 @@
-package com.lab1.interfaces;
-import com.lab1.common.Playlist;
-import com.lab1.common.Track;
-import com.lab1.exception.*;
+package app.interfaces;
+import app.common.Playlist;
+import app.common.Track;
+import app.exception.*;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Map;

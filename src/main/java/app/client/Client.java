@@ -1,11 +1,11 @@
-package com.lab1.client;
+package app.client;
 
-import com.lab1.common.Playlist;
-import com.lab1.common.User;
-import com.lab1.exception.PlaylistNotFoundException;
-import com.lab1.exception.TrackNotFoundException;
-import com.lab1.common.Track;
-import com.lab1.exception.UserNotFoundException;
+import app.common.Playlist;
+import app.common.User;
+import app.exception.PlaylistNotFoundException;
+import app.exception.TrackNotFoundException;
+import app.common.Track;
+import app.exception.UserNotFoundException;
 
 import javax.naming.AuthenticationException;
 import java.io.*;
@@ -32,7 +32,7 @@ public class Client extends ClientConnection {
             while (user == null) {
                 System.out.print("Логин: ");
                 String userLogin = console.nextLine();
-                boolean isExistUser = client.user.isExistUser(userLogin);
+                boolean isExistUser = false; //client.user.isExistUser(userLogin);
                 if (isExistUser) {
                     System.out.print("Пароль: ");
                 } else {
@@ -49,18 +49,18 @@ public class Client extends ClientConnection {
                     String userName = console.nextLine();
 
                     try {
-                        user = client.user.create(userLogin, userPassword, userName);
+                        //user = client.user.create(userLogin, userPassword, userName);
                     }catch (IllegalArgumentException e){
                         System.err.println(e.getMessage());
                         System.out.println("Ошибка созадния пользователя. Попробуйте снова");
                     }
                 } else {
-                    try {
-                        user = client.user.get(userLogin, userPassword);
+                   /* try {
+                        //user = client.user.get(userLogin, userPassword);
                     }catch (UserNotFoundException | AuthenticationException e){
                         System.err.println(e.getMessage());
                         System.out.println("Попробуйте снова");
-                    }
+                    }*/
                 }
             }
             System.out.println("Добро пожаловать, "+user.getName());

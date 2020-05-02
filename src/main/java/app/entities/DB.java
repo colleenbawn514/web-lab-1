@@ -1,6 +1,7 @@
-package com.lab1.server;
+package app.entities;
 
 import java.sql.*;
+import org.sqlite.*;
 
 public class DB {
     public Connection conn;
@@ -10,7 +11,7 @@ public class DB {
     public DB(String nameDB) throws ClassNotFoundException, SQLException {
         conn = null;
         Class.forName("org.sqlite.JDBC");
-        conn = DriverManager.getConnection("jdbc:sqlite:" + nameDB + ".s3db");
+        conn = DriverManager.getConnection("jdbc:sqlite:" + nameDB);
 
         System.out.println("База Подключена!");
         statmt = conn.createStatement();
@@ -18,7 +19,7 @@ public class DB {
 
     // --------ПОДКЛЮЧЕНИЕ К БАЗЕ ДАННЫХ--------
     public static DB connection(String nameDB) throws ClassNotFoundException, SQLException {
-        return new DB(nameDB);
+        return new DB("D:/lab_web/colleen.music.s3db");
     }
 
     // --------Заполнение таблицы--------

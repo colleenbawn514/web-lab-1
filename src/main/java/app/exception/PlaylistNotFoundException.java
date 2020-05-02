@@ -1,4 +1,4 @@
-package com.lab1.exception;
+package app.exception;
 
 public class PlaylistNotFoundException extends Exception {
     public PlaylistNotFoundException(String message) {

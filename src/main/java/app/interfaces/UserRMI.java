@@ -1,4 +1,4 @@
-package com.lab1.interfaces;
+package app.interfaces;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;

@@ -1,6 +1,6 @@
-package com.lab1.common;
+package app.common;
 
-import com.lab1.interfaces.PlaylistRMI;
+import app.interfaces.PlaylistRMI;
 import java.io.*;
 import java.util.ArrayList;
 
@@ -47,10 +47,5 @@ public class Playlist<T> implements Serializable, PlaylistRMI {
 
     public ArrayList<T> getTrackIds() {
         return this.trackIds;
-    }
-
-    public  Playlist<Track> getFullPlaylist(){
-        ArrayList
-        return new Playlist<Track>(this.name, this.id, )
     }
 }

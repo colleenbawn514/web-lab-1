@@ -1,17 +1,14 @@
-package com.lab1.server;
+package app.entities;
 
-import com.lab1.common.User;
-import com.lab1.exception.PlaylistNotFoundException;
-import com.lab1.exception.TrackNotFoundException;
-import com.lab1.exception.UserNotFoundException;
-import com.lab1.interfaces.PlaylistManagerRemote;
-import com.lab1.common.Playlist;
-import com.lab1.common.Track;
+import app.exception.PlaylistNotFoundException;
+import app.exception.UserNotFoundException;
+import app.interfaces.PlaylistManagerRemote;
+import app.common.Playlist;
+import app.common.Track;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
