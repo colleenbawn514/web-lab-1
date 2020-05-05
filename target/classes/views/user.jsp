@@ -5,19 +5,28 @@
 <% title = "Мои плейлисты";%>
 <%@include file="../templates/header.jsp" %>
 <main>
-	<h1>Добро пожаловать, ${name}</h1>
-	<a href="/user/playlist/create">Создать плейлист</a>
+	<h1 class="header">Добро пожаловать, ${name}</h1>
 	<%
-		if ( request.getParameter("firstVisit") != null) {
+
+		if ( true || request.getParameter("firstVisit") != null) {
 	%>
-		<h4 style="color: #00F;">С успешной регистрацией!</h4>
+		<div class="banner" >С успешной регистрацией!</div>
 	<% } %>
-	<%
-		Map<Integer, String> playlists = (Map<Integer, String>) request.getAttribute("playlists");
-		System.out.println(playlists);
-		for (int id : playlists.keySet() ) {
-	%>
-		<a href="/user/playlist?id=<%=id%>"><%=playlists.get(id)%></a>
-	<% } %>
+	<div class="playlists-container">
+		<a href="/user/playlist/create" class="reset-link">
+			<div class="playlist-card create-playlist">+</div>
+		</a>
+		<%
+			Map<Integer, String> playlists = (Map<Integer, String>) request.getAttribute("playlists");
+			System.out.println(playlists);
+			for (int id : playlists.keySet() ) {
+		%>
+			<a href="/user/playlist?id=<%=id%>" class="reset-link">
+				<div class="playlist-card">
+					<%=playlists.get(id)%>
+				</div>
+			</a>
+		<% } %>
+	</div>
 </main>
 <%@include file="../templates/footer.jsp" %>

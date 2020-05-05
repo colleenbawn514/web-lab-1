@@ -98,7 +98,7 @@
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>default</servlet-name>
-        <url-pattern>/css/*</url-pattern>
+        <url-pattern>/resources/*</url-pattern>
     </servlet-mapping>
     <!--<error-page>
         <error-code>404</error-code>

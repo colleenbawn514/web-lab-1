@@ -4,8 +4,10 @@
 <% title = "Авторизация";%>
 <%@include file="../templates/header.jsp" %>
 <main class="center">
-    <h2>Вход в систему</h2>
     <div class="card">
+        <div class="card-header" style="background-image: url('/resources/images/auth.png')">
+            Вход в систему
+        </div>
         <form action="" method="POST">
             <% if (Boolean.TRUE.equals(request.getAttribute("errorLogin")) ) { %>
             <p style="color: red;">Пользователь не найден<p>

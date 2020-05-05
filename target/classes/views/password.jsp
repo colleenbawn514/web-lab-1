@@ -4,8 +4,10 @@
 <% title = "Пароль";%>
 <%@include file="../templates/header.jsp" %>
 <main class="center">
-    <h2>Введите пароль</h2>
     <div class="card">
+        <div class="card-header" style="background-image: url('/resources/images/auth.png')">
+            Введите пароль
+        </div>
         <a href="/auth">Вернуться назад</a>
         <form action="" method="POST">
             <% if (Boolean.TRUE.equals(request.getAttribute("errorPassword")) ) { %>

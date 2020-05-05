@@ -13,8 +13,8 @@
 <% title = playlist.getName();%>
 <%@include file="../templates/header.jsp" %>
 <main>
-    <h5>Плейлист</h5>
-    <h1><%= playlist.getName()%></h1>
+    <h5 class="subheader">Плейлист</h5>
+    <h1 class="header"><%= playlist.getName()%></h1>
     <a href="/user/playlist/trackAdd?playlistId=<%=playlist.getId()%>">Добавьте трек</a>
     <table>
         <thead>
@@ -24,7 +24,7 @@
         </thead>
         <tbody>
             <% if (tracks.size()==0) { %>
-            <tr>
+            <tr class="empty-row">
                 <td colspan="4">
                     <span>Треков еще нет</span>
                     <br>

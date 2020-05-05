@@ -1,11 +1,9 @@
 package app.common;
 
-import app.interfaces.UserRMI;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class User implements Serializable, UserRMI {
+public class User implements Serializable {
     private static final long serialVersionUID = 1;
     private int id;
     private String login;

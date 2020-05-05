@@ -3,14 +3,18 @@
 <%@include file="../templates/prepare.jsp" %>
 <% title = "Создать плейлист";%>
 <%@include file="../templates/header.jsp" %>
-<main>
-    <div>
+<main class="center">
+    <div class="card">
+        <div class="card-header" style="background-image: url('/resources/images/playlist-create.png')">
+            Создание плейлиста
+        </div>
         <a href="/user">Вернуться назад</a>
-        <h2>Создание плейлиста</h2>
         <form action="" method="POST">
             <label for="name">Название плейлиста*</label>
             <input type="text" name="name" id="name" required>
-            <input type="submit" value="Создать">
+            <div class="card-action">
+                <input type="submit" value="Создать" class="button">
+            </div>
         </form>
     </div>
 </main>

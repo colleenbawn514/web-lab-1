@@ -1,10 +1,9 @@
 package app.common;
 
-import app.interfaces.PlaylistRMI;
 import java.io.*;
 import java.util.ArrayList;
 
-public class Playlist<T> implements Serializable, PlaylistRMI {
+public class Playlist<T> implements Serializable {
     private static final long serialVersionUID = 1;
     private ArrayList<T> trackIds = new ArrayList<>();//номер трека
     private String name;

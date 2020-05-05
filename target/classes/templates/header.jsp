@@ -10,9 +10,10 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title><%=title%></title>
     <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/header.css">
-    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/main.css">
-    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/footer.css">
+    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/resources/css/header.css">
+    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/resources/css/main.css">
+    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/resources/css/footer.css">
+    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/resources/css/playlists.css">
 </head>
 <body>
 <header>

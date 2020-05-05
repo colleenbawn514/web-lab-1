@@ -3,10 +3,12 @@
 <%@include file="../templates/prepare.jsp" %>
 <% title = "Добавление трека";%>
 <%@include file="../templates/header.jsp" %>
-<main>
-    <div>
+<main class="center">
+    <div class="card">
+        <div class="card-header" style="background-image: url('/resources/images/track-add.png')">
+           Добавление трека
+        </div>
         <a href="/user">Вернуться назад</a>
-        <h2>Добавление трека</h2>
         <form action="" method="POST">
             <label for="author">Исполнитель*</label>
             <input type="text" name="author" id="author" value="${author}" required>
@@ -25,7 +27,9 @@
                 <% } %>
             <label for="duration">Длительность*</label>
             <input type="number" name="duration" id="duration" value="${duration}" step="0.001" required>
-            <input type="submit" value="Создать">
+            <div class="card-action">
+                <input type="submit" value="Создать" class="button">
+            </div>
         </form>
     </div>
 </main>

@@ -4,8 +4,11 @@
 <% title = "Регистрация";%>
 <%@include file="../templates/header.jsp" %>
 <main class="center" >
-    <h2>Регистрация</h2>
+
     <div class="card">
+        <div class="card-header" style="background-image: url('/resources/images/reg.png')">
+            Регистрация
+        </div>
         <form action="" method="POST">
             <% if (Boolean.TRUE.equals(request.getAttribute("errorUserAlreadyExist")) ) { %>
             <p style="color: red;">Логин занят<p>
