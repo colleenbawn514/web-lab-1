@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class authCheckFilter implements Filter {
-    List<String> ignoreUrl = List.of("/auth", "/registration", "/password", "logout", "/");
+    List<String> ignoreUrl = List.of("/auth", "/registration", "/password", "logout", "/", "/css");
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
