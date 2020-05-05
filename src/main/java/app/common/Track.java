@@ -46,7 +46,7 @@ public class Track implements Serializable, TrackRMI {
         return this.id;
     }
 
-    public String getauthor() {
+    public String getAuthor() {
         return this.author;
     }
 

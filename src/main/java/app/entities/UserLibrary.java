@@ -13,20 +13,18 @@ import java.util.Map;
 public class UserLibrary {
     private static Map<Integer, User> usersById = new HashMap<>();
     private static Map<String, User> usersByLogin = new HashMap<>();
-    private static DB db;
-
     static {
         try {
-            db = UserLibrary.connectToDB();
+            UserLibrary.connectToDB();
         } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    public static DB connectToDB() throws SQLException, ClassNotFoundException {
-        DB db = DB.connection("colleen.music");
+    public static void connectToDB() throws SQLException, ClassNotFoundException {
+        DB.connection();
         try {
-            db.execute(
+            DB.execute(
                     "CREATE TABLE IF NOT EXISTS `users` ( " +
                             "   id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                             "   login VARCHAR(20), " +
@@ -34,7 +32,7 @@ public class UserLibrary {
                             "   name VARCHAR(20) " +
                             " )"
             );
-            db.execute(
+            DB.execute(
                     "CREATE TABLE IF NOT EXISTS `usersPlaylists` ( " +
                             "   id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                             "   playlistId INTEGER, " +
@@ -42,23 +40,22 @@ public class UserLibrary {
                             " )"
             );
         } catch (SQLException e) {
-            System.err.println("Error get tracks from db");
+            System.err.println("Error get tracks from DB");
             e.printStackTrace();
         }
-        return db;
     }
 
     public static User create(String login, String password, String name) throws IllegalArgumentException {
         int userId;
         User user = null;
         try {
-            UserLibrary.db.execute(
+            DB.execute(
                     "INSERT INTO `users` " +
                             "    (login, password, name) " +
                             "VALUES " +
                             "    ('" + login + "', '" + password + "', '" + name + "');"
             );
-            ResultSet result = UserLibrary.db.executeQuery("SELECT MAX(id) FROM `users`");
+            ResultSet result = DB.executeQuery("SELECT MAX(id) FROM `users`");
             if(result.next()){
                 userId = result.getInt(1);
             } else {
@@ -68,7 +65,7 @@ public class UserLibrary {
             UserLibrary.usersById.put(userId, user);
             UserLibrary.usersByLogin.put(user.getLogin(), user);
         } catch (SQLException e) {
-            System.err.println("Error write do db");
+            System.err.println("Error write do DB");
             e.printStackTrace();
         }
 
@@ -79,7 +76,7 @@ public class UserLibrary {
         boolean userIsCached = UserLibrary.usersById.containsKey(userId);
         if (!userIsCached) {
             try {
-                ResultSet result = UserLibrary.db.executeQuery("SELECT * FROM `users` where `id`='" + userId+"'");
+                ResultSet result = DB.executeQuery("SELECT * FROM `users` where `id`='" + userId+"'");
                 if (result.next()) {
 
                     int id = result.getInt("id");
@@ -87,7 +84,7 @@ public class UserLibrary {
                     String password = result.getString("pasword");
                     String name = result.getString("name");
 
-                    ResultSet resultPlaylist = UserLibrary.db.executeQuery("SELECT * FROM `usersPlaylists` where `userId`='" + result.getString("id") + "'");
+                    ResultSet resultPlaylist = DB.executeQuery("SELECT * FROM `usersPlaylists` where `userId`='" + result.getString("id") + "'");
 
                     ArrayList<Integer> playlistIds = new ArrayList<>();
                     while (resultPlaylist.next()) {
@@ -118,7 +115,7 @@ public class UserLibrary {
                 }
 
             } catch (SQLException e) {
-                System.err.println("Error get tracks from db");
+                System.err.println("Error get tracks from DB");
                 e.printStackTrace();
             }
         }
@@ -138,13 +135,13 @@ public class UserLibrary {
         }
         if (!UserLibrary.usersByLogin.containsKey(login)) {
             try {
-                ResultSet result = UserLibrary.db.executeQuery("SELECT * FROM `users` where `login`='" + login + "' and `password`='" + password+"'");
+                ResultSet result = DB.executeQuery("SELECT * FROM `users` where `login`='" + login + "' and `password`='" + password+"'");
                 if (result.next()) {
 
                     int id = result.getInt("id");
                     String name = result.getString("name");
 
-                    ResultSet resultPlaylist = UserLibrary.db.executeQuery("SELECT * FROM `usersPlaylists` where `userId`='" + result.getString("id") + "'");
+                    ResultSet resultPlaylist = DB.executeQuery("SELECT * FROM `usersPlaylists` where `userId`='" + result.getString("id") + "'");
 
                     ArrayList<Integer> playlistIds = new ArrayList<>();
                     while (resultPlaylist.next()) {
@@ -172,7 +169,7 @@ public class UserLibrary {
                     System.out.println("User " + login + " is cached.");
                 }
             } catch (SQLException e) {
-                System.err.println("Error get tracks from db");
+                System.err.println("Error get tracks from DB");
                 e.printStackTrace();
             }
         }else {
@@ -190,21 +187,21 @@ public class UserLibrary {
         if (!userIsExist) {
             System.out.println("User " + login + " not find in cache. Search in DB");
             try {
-                ResultSet result = UserLibrary.db.executeQuery("SELECT login FROM `users` WHERE `login`='" + login + "'");
+                ResultSet result = DB.executeQuery("SELECT login FROM `users` WHERE `login`='" + login + "'");
                 userIsExist = result.next();
                 System.out.println("User " + login + " in DB: " + (userIsExist ? "found" : "not found"));
             } catch (SQLException e) {
-                System.err.println("Error get tracks from db");
+                System.err.println("Error get tracks from DB");
                 e.printStackTrace();
             }
         }
         return userIsExist;
     }
 
-    public void addPlaylist(int userId, int playlistId) throws UserNotFoundException {
+    public static void addPlaylist(int userId, int playlistId) throws UserNotFoundException {
         UserLibrary.get(userId).getPlaylistIds().add(playlistId);
         try {
-            UserLibrary.db.execute(
+            DB.execute(
                     "INSERT INTO  `usersPlaylists` " +
                             "    (playlistId, userId) " +
                             "VALUES " +
@@ -212,7 +209,7 @@ public class UserLibrary {
             );
             System.out.println("Add playlist " + playlistId + " for user " + UserLibrary.get(userId).getLogin());
         } catch (SQLException e) {
-            System.err.println("Error write do db");
+            System.err.println("Error write do DB");
             e.printStackTrace();
         }
     }

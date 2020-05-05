@@ -13,7 +13,7 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Scanner;
-
+/*
 public class Client extends ClientConnection {
     public Utils utils;
 
@@ -61,13 +61,13 @@ public class Client extends ClientConnection {
                         System.err.println(e.getMessage());
                         System.out.println("Попробуйте снова");
                     }*/
-                }
+               /* }
             }
             System.out.println("Добро пожаловать, "+user.getName());
             System.out.println("Для выполнения задания напишите 'run task' или 'help' чтобы посмотреть помощь");
             while (!isExit) {
-                System.out.print("> ");
-
+                System.out.print("> ");*/
+/*
                 switch (console.nextLine().trim()) {
                     case "create p"://создать плейлист
                         System.out.print("Playlist name: ");
@@ -131,7 +131,7 @@ public class Client extends ClientConnection {
                             System.out.println(String.format(
                                     "%-4s| %-21s | %-21s | %-17s | %s",
                                     id,
-                                    track.getauthor(),
+                                    track.getAuthor(),
                                     track.getName(),
                                     track.getDuration(),
                                     track.getSize()
@@ -156,7 +156,7 @@ public class Client extends ClientConnection {
 
                         client.playlist.removeDuplicate(user.getId(), playlistId);
                         break;*/
-                    case "run task":
+                    /*case "run task":
                         try {
                             System.out.print("Path: ");
                             path = console.nextLine();
@@ -199,8 +199,8 @@ public class Client extends ClientConnection {
                     default:
                         System.out.println("Unknown command");
                         break;
-                }
-            }
+                }*/
+            /*}
         }
     }
-}
+}*/

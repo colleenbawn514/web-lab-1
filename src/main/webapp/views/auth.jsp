@@ -7,14 +7,15 @@
 		<title>Авторизация</title>
 	</head>
 	<body>
+        <%@include file="../templates/header.jsp" %>
 		<div>
             <h2>Вход в систему</h2>
             <form action="" method="POST">
-                <% if (new Boolean(true).equals(request.getAttribute("errorLogin")) ) { %>
+                <% if (Boolean.TRUE.equals(request.getAttribute("errorLogin")) ) { %>
                      <p style="color: red;">Пользователь не найден<p>
                 <% } %>
                 <label for="login">Логин*</label>
-                <input type="text" name="login" id="label" value="${login}">
+                <input type="text" name="login" id="login" value="${login}" autofocus required >
                 <br/>
                 <button name="action" type="submit" value="login">Войти</button>
                 <button name="action" type="submit" value="registration">Зарегистрироваться</button>

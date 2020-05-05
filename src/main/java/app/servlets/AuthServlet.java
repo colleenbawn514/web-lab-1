@@ -10,6 +10,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -26,7 +27,8 @@ public class AuthServlet extends HttpServlet {
         String action = req.getParameter("action");
 
         if ("registration".equals(action)) {
-            resp.sendRedirect("/registration");
+            resp.sendRedirect("/registration?regLogin="+login);
+
             return;
         }
 
@@ -42,6 +44,9 @@ public class AuthServlet extends HttpServlet {
                 User user = null;
                 try {
                     user = UserLibrary.get(login, password);
+                    HttpSession session = req.getSession();
+                    session.setAttribute("userId", user.getId());
+                    session.setAttribute("user", user);
                     resp.sendRedirect("/user");
                 }catch (UserNotFoundException | AuthenticationException e){
                     RequestDispatcher requestDispatcher = req.getRequestDispatcher("views/password.jsp");

@@ -1,12 +1,11 @@
 package app.client;
-
+/*
 import app.common.Playlist;
 import app.common.Track;
 import app.common.User;
 import app.exception.PlaylistNotFoundException;
 import app.exception.TrackNotFoundException;
 import app.exception.UserNotFoundException;
-import app.interfaces.PlaylistManagerRemote;
 import app.interfaces.TrackManagerRemote;
 
 import java.io.*;
@@ -16,11 +15,9 @@ import java.util.Locale;
 import java.util.Scanner;
 
 public class Utils {
-    public PlaylistManagerRemote playlist;
     public TrackManagerRemote track;
 
     public Utils(ClientConnection client) {
-        this.playlist = client.playlist;
         this.track = client.track;
     }
 
@@ -61,7 +58,7 @@ public class Utils {
             ArrayList<Integer> tracks = this.playlist.get(user.getId(), playlistId).getTrackIds();
             for (int id : tracks) {
                 Track track = this.track.get(id);
-                writer.write(track.getauthor() + "\n");
+                writer.write(track.getAuthor() + "\n");
                 writer.write(track.getName() + "\n");
                 writer.write(track.getDuration() + "\n");
                 writer.write(track.getSize() + "\n");
@@ -96,4 +93,4 @@ public class Utils {
             System.out.println(e2.getMessage());
         }
     }
-}
+}*/

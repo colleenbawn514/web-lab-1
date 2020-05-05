@@ -7,18 +7,19 @@
 		<title>Авторизация</title>
 	</head>
 	<body>
+        <%@include file="../templates/header.jsp" %>
 		<div>
 		    <a href="/auth">Вернуться назад</a>
 		    <h2>Введите пароль</h2>
             <form action="" method="POST">
-                <% if (new Boolean(true).equals(request.getAttribute("errorPassword")) ) { %>
+                <% if (Boolean.TRUE.equals(request.getAttribute("errorPassword")) ) { %>
                     <p style="color: red;">Неверный пароль<p>
                 <% } %>
                 <p>Логин: ${login}</p>
                 <input type="hidden" name="login" value="${login}">
                 <br/>
-                <label for="password">Пароль</label>
-                <input type="password" name="password" id="password">
+                <label for="password">Пароль*</label>
+                <input type="password" name="password" id="password" autofocus required>
                 <br/>
                 <input type="submit" value="Войти">
             </form>

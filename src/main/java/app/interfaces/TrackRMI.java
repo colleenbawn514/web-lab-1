@@ -6,7 +6,7 @@ import java.rmi.RemoteException;
 public interface TrackRMI extends Remote {
     int getId() throws RemoteException;
 
-    String getauthor() throws RemoteException;
+    String getAuthor() throws RemoteException;
 
     String getName() throws RemoteException;
 
