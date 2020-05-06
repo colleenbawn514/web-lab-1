@@ -100,9 +100,17 @@
         <servlet-name>default</servlet-name>
         <url-pattern>/resources/*</url-pattern>
     </servlet-mapping>
-    <!--<error-page>
+    <servlet>
+        <servlet-name>exportXml</servlet-name>
+        <servlet-class>app.servlets.UserExportServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>exportXml</servlet-name>
+        <url-pattern>/user/exportXml</url-pattern>
+    </servlet-mapping>
+    <error-page>
         <error-code>404</error-code>
         <location>/errors/404.jsp</location>
-    </error-page>-->
+    </error-page>
 
 </web-app>
