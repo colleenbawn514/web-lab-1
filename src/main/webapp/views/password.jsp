@@ -6,19 +6,19 @@
 <main class="center">
     <div class="card">
         <div class="card-header" style="background-image: url('/resources/images/auth.png')">
-            Введите пароль
+            <span>Введите пароль</span>
         </div>
-        <a href="/auth">Вернуться назад</a>
-        <form action="" method="POST">
-            <% if (Boolean.TRUE.equals(request.getAttribute("errorPassword")) ) { %>
-            <p style="color: red;">Неверный пароль<p>
-                <% } %>
-            <p>Логин: ${login}</p>
-            <input type="hidden" name="login" value="${login}">
-            <br/>
-            <label for="password">Пароль*</label>
-            <input type="password" name="password" id="password" autofocus required>
-            <br/>
+        <form  action="" method="POST">
+            <div class="card-body">
+                <a href="/auth">Вернуться назад</a>
+                <% if (Boolean.TRUE.equals(request.getAttribute("errorPassword")) ) { %>
+                <p style="color: red;">Неверный пароль<p>
+                    <% } %>
+                <p>Логин: ${login}</p>
+                <input type="hidden" name="login" value="${login}">
+                <label for="password">Пароль*</label>
+                <input type="password" name="password" id="password" autofocus required>
+            </div>
             <div class="card-action">
                 <input type="submit" value="Войти" class="button">
             </div>

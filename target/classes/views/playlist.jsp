@@ -14,8 +14,10 @@
 <%@include file="../templates/header.jsp" %>
 <main>
     <h5 class="subheader">Плейлист</h5>
-    <h1 class="header"><%= playlist.getName()%></h1>
-    <a href="/user/playlist/trackAdd?playlistId=<%=playlist.getId()%>">Добавьте трек</a>
+    <div class="page-header">
+        <h1 class="header"><%= playlist.getName()%></h1>
+        <a class="reset-link button" href="/user/playlist/trackAdd?playlistId=<%=playlist.getId()%>">Добавьте трек</a>
+    </div>
     <table>
         <thead>
             <tr>
@@ -28,7 +30,8 @@
                 <td colspan="4">
                     <span>Треков еще нет</span>
                     <br>
-                    <a href="/user/playlist/trackAdd?playlistId=<%=playlist.getId()%>">добавьте первый трек</a>
+                    <a class="reset-link button"
+                       href="/user/playlist/trackAdd?playlistId=<%=playlist.getId()%>"> добавьте первый трек</a>
                 </td>
             </tr>
             <% } %>

@@ -5,10 +5,12 @@
 <% title = "Мои плейлисты";%>
 <%@include file="../templates/header.jsp" %>
 <main>
-	<h1 class="header">Добро пожаловать, ${name}</h1>
+	<div class="page-header">
+		<h1 class="header">Добро пожаловать, ${name}</h1>
+		<a class="reset-link button" href="/user/exportXml">Выгрузить пользователя в XML</a>
+	</div>
 	<%
-
-		if ( true || request.getParameter("firstVisit") != null) {
+		if ( request.getParameter("firstVisit") != null) {
 	%>
 		<div class="banner" >С успешной регистрацией!</div>
 	<% } %>
@@ -28,5 +30,6 @@
 			</a>
 		<% } %>
 	</div>
+
 </main>
 <%@include file="../templates/footer.jsp" %>

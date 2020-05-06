@@ -6,12 +6,15 @@
 <main class="center">
     <div class="card">
         <div class="card-header" style="background-image: url('/resources/images/playlist-create.png')">
-            Создание плейлиста
+            <span>Создание плейлиста</span>
         </div>
-        <a href="/user">Вернуться назад</a>
         <form action="" method="POST">
-            <label for="name">Название плейлиста*</label>
-            <input type="text" name="name" id="name" required>
+            <div class="card-body">
+                <a href="/user">Вернуться назад</a>
+                <br>
+                <label for="name">Название плейлиста*</label>
+                <input type="text" name="name" id="name" required>
+            </div>
             <div class="card-action">
                 <input type="submit" value="Создать" class="button">
             </div>

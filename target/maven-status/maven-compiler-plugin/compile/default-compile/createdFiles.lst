@@ -7,7 +7,6 @@ app\entities\PlaylistLibrary.class
 app\entities\DB.class
 app\exception\UserNotFoundException.class
 app\exception\TrackNotFoundException.class
-app\servlets\UserExpotrServlet.class
 app\servlets\AuthServlet.class
 app\common\User.class
 app\common\Track.class

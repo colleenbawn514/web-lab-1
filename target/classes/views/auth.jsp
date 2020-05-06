@@ -6,15 +6,17 @@
 <main class="center">
     <div class="card">
         <div class="card-header" style="background-image: url('/resources/images/auth.png')">
-            Вход в систему
+            <span>Вход в систему</span>
         </div>
-        <form action="" method="POST">
-            <% if (Boolean.TRUE.equals(request.getAttribute("errorLogin")) ) { %>
-            <p style="color: red;">Пользователь не найден<p>
-                <% } %>
-            <label for="login">Логин*</label>
-            <input type="text" name="login" id="login" value="${login}" autofocus required >
-            <br/>
+        <form  action="" method="POST">
+            <div class="card-body">
+                <% if (Boolean.TRUE.equals(request.getAttribute("errorLogin")) ) { %>
+                <p style="color: red;">Пользователь не найден<p>
+                    <% } %>
+                <label for="login">Логин*</label>
+                <input type="text" name="login" id="login" value="${login}" autofocus required >
+            </div>
+
             <div class="card-action">
                 <button name="action" type="submit" value="login" class="button">Войти</button>
                 <button name="action" type="submit" value="registration" class="button">Зарегистрироваться</button>
