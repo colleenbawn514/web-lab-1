@@ -29,9 +29,6 @@
             <tr class="empty-row">
                 <td colspan="4">
                     <span>Треков еще нет</span>
-                    <br>
-                    <a class="reset-link button"
-                       href="/user/playlist/trackAdd?playlistId=<%=playlist.getId()%>"> добавьте первый трек</a>
                 </td>
             </tr>
             <% } %>
