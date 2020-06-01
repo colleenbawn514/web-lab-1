@@ -1,0 +1,25 @@
+{
+  "name": "letdown",
+  "version": "0.1.0",
+  "description": "Frontend side for letdown project",
+  "author": "Colleen",
+  "scripts": {
+    "watch": "webpack --watch -d --output ./target/classes/static/js/bundle.js",
+    "build": "webpack --mode production"
+  },
+  "dependencies": {
+    "@material-ui/core": "^4.10.0",
+    "@material-ui/icons": "^4.9.1",
+    "babel-loader": "^8.1.0",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.10.2",
+    "@babel/preset-env": "^7.10.2",
+    "@babel/preset-react": "^7.10.1",
+    "babel-cli": "^6.26.0",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.11"
+  }
+}

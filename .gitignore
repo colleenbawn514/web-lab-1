@@ -1,4 +1,12 @@
 .idea
 out
 tmp
+
+### Custom ###
+node_modules
 target
+.mvn
+src/main/resources/static/js/bundle.js
+src/main/resources/static/js/bundle.js.map
+*.log
+testdb.trace.db
