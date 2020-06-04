@@ -1,5 +1,7 @@
 package com.colleen.letdown.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.sql.Timestamp;
 
@@ -7,6 +9,7 @@ import java.sql.Timestamp;
 @Table(name = "tokens")
 public class Token {
     @Id
+    @JsonIgnore
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false)
     private long id;
@@ -51,6 +54,7 @@ public class Token {
     }
 
     @OneToOne
+    @JsonIgnore
     @PrimaryKeyJoinColumn(name = "user_id")
     private User user;
 

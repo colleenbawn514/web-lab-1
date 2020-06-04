@@ -1,9 +1,24 @@
 import React from 'react';
-import { Button } from '@material-ui/core';
+import {
+    CssBaseline,
+    ThemeProvider
+} from '@material-ui/core';
+import theme from '../theme/theme';
+import Workspace from "./Workspace";
+import { Router } from "react-router-dom"
+import {createBrowserHistory} from 'history'
+
 
 function App() {
+    const history = createBrowserHistory()
+
     return (
-        <Button color="primary">Hello World</Button>
+        <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <Router history={history}>
+                <Workspace />
+            </Router>
+        </ThemeProvider>
     );
 }
 

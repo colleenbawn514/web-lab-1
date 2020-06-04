@@ -34,7 +34,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) {
         web.ignoring()
-                .antMatchers("/api/create");
+                .antMatchers("/api/users/create", "/h2", "/h2-console");
     }
     @Override
     protected void configure(HttpSecurity http) throws Exception {

@@ -7,7 +7,6 @@ import com.colleen.letdown.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -26,18 +25,18 @@ public class AuthController {
 
     @ResponseBody
     @PostMapping("/auth")
-    public String getToken(@RequestParam String login, @RequestParam String password){
+    public ResponseEntity<?> getToken(@RequestParam String login, @RequestParam String password){
         User user = userDAO.findByLogin(login);
         if(user==null || !user.getPassword().equals(password)) {
-            throw new BadCredentialsException("Incorrect login or password");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         Token token = new Token();
-        token.setExpirationDate(new Timestamp(System.currentTimeMillis()+60*1000));
+        token.setExpirationDate(new Timestamp(System.currentTimeMillis()+10*60*1000));
         token.setUser(user);
         token.setToken(UUID.randomUUID().toString());
         tokenDAO.save(token);
 
-        return token.getToken();
+        return new ResponseEntity<>(token, HttpStatus.OK);
     }
     @ResponseBody
     @PostMapping("/logout")
